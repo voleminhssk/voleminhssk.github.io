@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Khung Giờ Quay Hũ VIP</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial, sans-serif;
+    background: radial-gradient(circle at top,#1b2735,#090a0f);
+    color:white;
+    text-align:center;
+}
+
+/* Tiêu đề */
+h1{
+    padding:20px;
+    font-size:28px;
+    color:gold;
+    text-shadow:0 0 15px gold;
+}
+
+/* Container */
+.container{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:25px;
+    padding:20px;
+}
+
+/* Ô game */
+.game-box{
+    width:220px;
+    height:140px;
+    border-radius:18px;
+    background:rgba(255,215,0,0.1);
+    border:2px solid gold;
+    backdrop-filter: blur(10px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.3s;
+    position:relative;
+    overflow:hidden;
+}
+
+.game-box:hover{
+    transform:scale(1.08);
+    box-shadow:0 0 25px gold;
+}
+
+.game-box.active{
+    box-shadow:0 0 35px #00ff00;
+    border-color:#00ff00;
+}
+
+/* Logo */
+.game-logo{
+    width:120px;
+    position:absolute;
+    top:8px;
+}
+
+/* Nhấp nháy */
+@keyframes blink {
+    0% { box-shadow:0 0 10px red; }
+    50% { box-shadow:0 0 35px red; }
+    100% { box-shadow:0 0 10px red; }
+}
+
+.game-box.warning{
+    animation: blink 1s infinite;
+    border-color:red;
+}
+
+/* Status box */
+.status{
+    margin:30px auto;
+    padding:25px;
+    width:90%;
+    max-width:700px;
+    border-radius:20px;
+    background:rgba(255,255,255,0.05);
+    backdrop-filter:blur(15px);
+    border:1px solid gold;
+}
+
+.active-now{
+    color:#00ff00;
+    font-weight:bold;
+}
+
+.countdown{
+    font-size:24px;
+    margin-top:20px;
+    font-weight:bold;
+    color:gold;
+}
+</style>
+</head>
+<body>
+
+<h1>🔥 KHUNG GIỜ QUAY HŨ VIP 🔥</h1>
+
+<div class="container">
+
+<div class="game-box" id="quyetchienBox" onclick="selectGame('quyetchien')">
+<img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiVeLA8fUwsSN_tT8Je-DtVxki-FS5sM3GOWFjybbnfCj9x5mVx9ppBzMy-lUdjA1hrhoH6bDXcy9Xt59VoBhoDE0_jJzZP0pFI0zdZ89vri1WoBw9p2W3zFGAvE_ItREF8pWfQz4SlM3G4YnrG0DLGlK4X9SGttM2jftsKGWW8oRv__u5gnIIGxR0CbSi-/w945-h600-p-k-no-nu/quyết%20chiến.jpg"
+class="game-logo">
+Quyết Chiến
+</div>
+
+<div class="game-box" id="macchuocBox" onclick="selectGame('macchuoc')">
+<img src="https://go99.exchange/wp-content/uploads/2024/07/tim-hieu-ve-no-hu-duong-mat-chuoc.jpg"
+class="game-logo">
+Mạc Chược
+</div>
+
+<div class="game-box" id="aztecBox" onclick="selectGame('aztec')">
+<img src="https://khietminhbakery.com/wp-content/uploads/2026/01/no-hu-kho-bau-aztec-1.jpg"
+class="game-logo">
+Aztec
+</div>
+
+</div>
+
+<div id="statusBox" class="status">
+Chọn game để xem khung giờ
+</div>
+
+<script>
+
+let currentGame=null;
+let interval=null;
+
+const games={
+quyetchien:[
+["13:05","14:20"],["15:25","16:20"],
+["20:00","21:05"],["21:25","22:20"],
+["22:25","22:55"],["23:10","23:40"]
+],
+macchuoc:[
+["12:50","13:25"],["13:40","14:15"],
+["14:45","16:05"],["16:15","18:05"],
+["18:25","18:55"],["19:10","21:15"],
+["22:20","23:55"],["00:05","02:15"]
+],
+aztec:[
+["13:25","13:55"],["14:50","15:40"],
+["17:30","18:00"],["18:45","21:45"],
+["21:50","23:10"]
+]
+};
+
+function toSec(t){
+let [h,m]=t.split(":");
+return parseInt(h)*3600+parseInt(m)*60;
+}
+
+function selectGame(g){
+currentGame=g;
+clearInterval(interval);
+interval=setInterval(update,1000);
+update();
+}
+
+function update(){
+if(!currentGame) return;
+
+document.querySelectorAll(".game-box").forEach(b=>{
+b.classList.remove("active","warning");
+});
+
+let now=new Date();
+let nowSec=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();
+let list=games[currentGame];
+
+let found=false;
+let nearest=999999;
+let box=document.getElementById(currentGame+"Box");
+
+let html="<h2>Khung giờ:</h2>";
+
+list.forEach(t=>{
+let start=toSec(t[0]);
+let end=toSec(t[1]);
+
+let active=false;
+
+if(start<=end){
+if(nowSec>=start && nowSec<=end) active=true;
+}else{
+if(nowSec>=start || nowSec<=end) active=true;
+}
+
+if(active){
+found=true;
+box.classList.add("active");
+let remain=end-nowSec;
+if(remain<0) remain+=86400;
+nearest=remain;
+html+=`<div class="active-now">${t[0]} - ${t[1]} (ĐANG HOẠT ĐỘNG)</div>`;
+}else{
+html+=`<div>${t[0]} - ${t[1]}</div>`;
+}
+
+let diff=start-nowSec;
+if(diff<0) diff+=86400;
+if(!found && diff<nearest) nearest=diff;
+});
+
+let min=Math.floor(nearest/60);
+let sec=nearest%60;
+
+if(found){
+html+=`<div class="countdown">Kết thúc sau: ${min} phút ${sec} giây</div>`;
+}else{
+html+=`<div class="countdown">Bắt đầu sau: ${min} phút ${sec} giây</div>`;
+if(nearest<=60){
+box.classList.add("warning"); // nhấp nháy khi còn dưới 60 giây
+}
+}
+
+document.getElementById("statusBox").innerHTML=html;
+}
+
+</script>
+
+</body>
+</html>
