@@ -3,43 +3,110 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Theo Dõi Khung Giờ Nâng Cấp</title>
+<title>VIP Time Slot Tracker</title>
 
 <style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
 body{
-  font-family:Arial;
-  background:#111;
-  color:#fff;
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  color:white;
   padding:20px;
-  transition:background 0.5s ease;
+  transition:background 0.6s ease;
 }
-h1{text-align:center;color:gold;}
-.now{text-align:center;font-size:20px;margin-bottom:20px;}
-table{width:100%;border-collapse:collapse;}
-th,td{border:1px solid #555;padding:10px;text-align:center;}
-.match{background:#2ecc71;color:#000;font-weight:bold;}
-.wait{background:#e74c3c;}
+
+.container{
+  max-width:900px;
+  margin:auto;
+  background:rgba(0,0,0,0.6);
+  backdrop-filter:blur(12px);
+  padding:30px;
+  border-radius:20px;
+  box-shadow:0 0 40px rgba(255,215,0,0.3);
+}
+
+h1{
+  text-align:center;
+  color:gold;
+  margin-bottom:20px;
+  text-shadow:0 0 15px gold;
+}
+
+.clock{
+  text-align:center;
+  font-size:22px;
+  margin-bottom:25px;
+  color:#00ffff;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th{
+  background:gold;
+  color:black;
+  padding:12px;
+}
+
+td{
+  padding:14px;
+  text-align:center;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+}
+
+.match{
+  background:linear-gradient(45deg,#00ff99,#00cc66);
+  color:black;
+  font-weight:bold;
+  box-shadow:0 0 15px #00ff99;
+}
+
+.wait{
+  background:linear-gradient(45deg,#ff4e50,#f00000);
+}
+
+tr:hover{
+  background:rgba(255,255,255,0.05);
+}
+
 .popup{
   position:fixed;
   top:50%;
   left:50%;
-  transform:translate(-50%,-50%);
-  background:#000;
-  padding:30px;
+  transform:translate(-50%,-50%) scale(0.8);
+  background:black;
+  padding:40px;
+  border-radius:20px;
   border:3px solid gold;
-  font-size:22px;
+  font-size:24px;
   text-align:center;
   display:none;
   z-index:9999;
-  box-shadow:0 0 30px gold;
+  box-shadow:0 0 50px gold;
+  animation:popupAnim 0.4s ease forwards;
 }
+
+@keyframes popupAnim{
+  to{transform:translate(-50%,-50%) scale(1);}
+}
+
+@media(max-width:600px){
+  td,th{font-size:14px;padding:10px;}
+  .popup{font-size:18px;padding:25px;}
+}
+
 </style>
 </head>
+
 <body>
 
-<h1>🔥 Theo Dõi Khung Giờ Tự Động 🔥</h1>
+<div class="container">
+<h1>🔥 VIP TIME SLOT TRACKER 🔥</h1>
 
-<div class="now">
+<div class="clock">
 ⏰ Giờ hiện tại: <span id="currentTime"></span>
 </div>
 
@@ -52,134 +119,129 @@ th,td{border:1px solid #555;padding:10px;text-align:center;}
 <tbody id="tableBody"></tbody>
 </table>
 
+</div>
+
 <div class="popup" id="popup"></div>
 
 <script>
 
-const timeSlots = [
-  {start:"00:00", end:"03:00"},
-  {start:"10:00", end:"11:00"},
-  {start:"11:00", end:"13:30"},
-  {start:"20:00", end:"23:00"}
+const timeSlots=[
+{start:"00:00",end:"03:00"},
+{start:"10:00",end:"11:00"},
+{start:"11:00",end:"13:30"},
+{start:"20:00",end:"23:00"},
+{start:"22:40",end:"23:45"}
 ];
 
-let activeIndex = -1;
-let firstLoad = true;
+let activeSlots=[];
+let firstLoad=true;
 
-function toMinutes(t){
-  const [h,m] = t.split(":").map(Number);
-  return h*60+m;
+function toMin(t){
+let [h,m]=t.split(":").map(Number);
+return h*60+m;
 }
 
 function pad(n){return n<10?"0"+n:n;}
 
 function showPopup(text){
-  const popup=document.getElementById("popup");
-  popup.innerText=text;
-  popup.style.display="block";
-  setTimeout(()=>popup.style.display="none",4000);
+let p=document.getElementById("popup");
+p.innerText=text;
+p.style.display="block";
+setTimeout(()=>p.style.display="none",3500);
 }
 
 function update(){
 
-  const now=new Date();
-  const nowMin=now.getHours()*60+now.getMinutes();
-  const nowSec=now.getSeconds();
+let now=new Date();
+let nowMin=now.getHours()*60+now.getMinutes();
+let nowSec=now.getSeconds();
 
-  document.getElementById("currentTime").innerText=
-    pad(now.getHours())+":"+
-    pad(now.getMinutes())+":"+
-    pad(now.getSeconds());
+document.getElementById("currentTime").innerText=
+pad(now.getHours())+":"+pad(now.getMinutes())+":"+pad(now.getSeconds());
 
-  let slotData=[];
+let data=[];
 
-  timeSlots.forEach((slot,index)=>{
+timeSlots.forEach((slot,i)=>{
+let start=toMin(slot.start);
+let end=toMin(slot.end);
 
-    let start=toMinutes(slot.start);
-    let end=toMinutes(slot.end);
+let inSlot=(nowMin>=start && nowMin<end);
 
-    let diff=start-nowMin;
-    if(diff<0) diff+=1440;
+let diff=start-nowMin;
+if(diff<0) diff+=1440;
 
-    let inSlot = (nowMin>=start && nowMin<end);
+data.push({i,start,end,diff,inSlot,raw:slot});
+});
 
-    slotData.push({
-      index,
-      start,
-      end,
-      diff,
-      inSlot,
-      raw:slot
-    });
-  });
+data.sort((a,b)=>{
+if(a.inSlot&&!b.inSlot) return -1;
+if(!a.inSlot&&b.inSlot) return 1;
+return a.diff-b.diff;
+});
 
-  // ===== SẮP XẾP THEO GẦN NHẤT =====
-  slotData.sort((a,b)=>a.diff-b.diff);
+let html="";
+let currentActive=[];
+let anyActive=false;
 
-  let html="";
-  let found=false;
+data.forEach(d=>{
+let status="";
+let detail="";
 
-  slotData.forEach(data=>{
+if(d.inSlot){
+let remainMin=d.end-nowMin-1;
+let remainSec=60-nowSec;
+if(remainSec===60) remainSec=0;
 
-    let status="";
-    let detail="";
+status="ĐANG TRONG KHUNG";
+detail=remainMin+" phút "+remainSec+" giây";
+currentActive.push(d.i);
+anyActive=true;
+}else{
+status="SẮP TỚI";
+detail="Còn "+d.diff+" phút";
+}
 
-    if(data.inSlot){
+html+=`
+<tr>
+<td>${d.raw.start} - ${d.raw.end}</td>
+<td class="${d.inSlot?'match':'wait'}">${status}</td>
+<td>${detail}</td>
+</tr>
+`;
+});
 
-      let remainMin=data.end-nowMin-1;
-      let remainSec=60-nowSec;
-      if(remainSec===60) remainSec=0;
+document.getElementById("tableBody").innerHTML=html;
 
-      status="ĐANG TRONG KHUNG";
-      detail=remainMin+" phút "+remainSec+" giây";
-      found=true;
+if(firstLoad){
+if(anyActive){
+showPopup("🔥 HIỆN ĐANG TRONG KHUNG GIỜ 🔥");
+document.body.style.background="linear-gradient(135deg,#003300,#006600)";
+}else{
+showPopup("⏳ KHUNG GẦN NHẤT SAU "+data[0].diff+" PHÚT");
+}
+firstLoad=false;
+}
 
-      if(activeIndex!==data.index){
-        showPopup("🔥 BẮT ĐẦU KHUNG GIỜ 🔥");
-      }
+currentActive.forEach(i=>{
+if(!activeSlots.includes(i)){
+showPopup("🔥 BẮT ĐẦU KHUNG GIỜ 🔥");
+}
+});
 
-      activeIndex=data.index;
+activeSlots.forEach(i=>{
+if(!currentActive.includes(i)){
+showPopup("⛔ KHUNG GIỜ ĐÃ KẾT THÚC ⛔");
+}
+});
 
-    }else{
+activeSlots=currentActive;
 
-      if(activeIndex===data.index){
-        showPopup("⛔ KHUNG GIỜ ĐÃ KẾT THÚC ⛔");
-        activeIndex=-1;
-      }
+if(anyActive){
+document.body.style.background="linear-gradient(135deg,#003300,#009933)";
+}else{
+document.body.style.background="linear-gradient(135deg,#0f2027,#203a43,#2c5364)";
+}
 
-      status="SẮP TỚI";
-      detail="Còn "+data.diff+" phút";
-    }
-
-    html+=`
-      <tr>
-        <td>${data.raw.start} - ${data.raw.end}</td>
-        <td class="${data.inSlot?'match':'wait'}">${status}</td>
-        <td>${detail}</td>
-      </tr>
-    `;
-  });
-
-  document.getElementById("tableBody").innerHTML=html;
-
-  // ===== POPUP KHI VỪA MỞ WEB =====
-  if(firstLoad){
-    if(found){
-      showPopup("🔥 ĐANG TRONG KHUNG GIỜ 🔥");
-      document.body.style.background="#145a32";
-    }else{
-      showPopup("⏳ SẮP TỚI SAU "+slotData[0].diff+" PHÚT");
-      document.body.style.background="#641e16";
-    }
-    firstLoad=false;
-  }
-
-  // ===== ĐỔI NỀN =====
-  if(found){
-    document.body.style.background="#145a32";
-  }else{
-    document.body.style.background="#111";
-  }
 }
 
 setInterval(update,1000);
