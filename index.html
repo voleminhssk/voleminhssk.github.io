@@ -3,33 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Phân Tích Khung Giờ</title>
+<title>AI Radar Scan</title>
 
 <style>
 body{
   margin:0;
-  background:#0b0f1d;
+  background:#050a18;
   font-family:Segoe UI;
   color:white;
   text-align:center;
+  overflow-x:hidden;
 }
+
 .container{
-  max-width:850px;
+  max-width:900px;
   margin:auto;
   padding:30px;
 }
+
 .card{
-  background:rgba(18,22,45,0.95);
+  background:rgba(10,15,35,0.95);
   padding:30px;
   border-radius:20px;
-  box-shadow:0 0 35px #00f7ff33;
+  box-shadow:0 0 40px #00f7ff44;
 }
+
 h1{
   color:#00f7ff;
   text-shadow:0 0 15px #00f7ff;
 }
+
 button{
-  padding:14px 25px;
+  padding:12px 25px;
   border:none;
   border-radius:12px;
   font-size:16px;
@@ -37,25 +42,52 @@ button{
   font-weight:bold;
   cursor:pointer;
 }
-.progress{
-  width:100%;
-  height:20px;
-  background:#111;
-  border-radius:20px;
+
+/* RADAR */
+
+.radar{
+  width:250px;
+  height:250px;
+  margin:30px auto;
+  border-radius:50%;
+  border:2px solid #00f7ff55;
+  position:relative;
   overflow:hidden;
-  margin-top:25px;
 }
-.bar{
+
+.radar::before{
+  content:"";
+  position:absolute;
+  width:100%;
   height:100%;
-  width:0%;
-  background:linear-gradient(90deg,#00f7ff,#00ff88);
+  background:radial-gradient(circle,#00ff8855 1%,transparent 60%);
 }
+
+.scan{
+  position:absolute;
+  width:100%;
+  height:100%;
+  background:conic-gradient(#00f7ff88 0deg,transparent 60deg);
+  animation:rotate 2s linear infinite;
+}
+
+@keyframes rotate{
+  from{transform:rotate(0deg);}
+  to{transform:rotate(360deg);}
+}
+
 .result{
-  margin-top:30px;
+  margin-top:20px;
 }
+
 .highlight{
-  font-size:26px;
+  font-size:24px;
   color:#00ff88;
+}
+.small{
+  font-size:13px;
+  opacity:0.8;
+  margin-top:5px;
 }
 </style>
 </head>
@@ -65,14 +97,15 @@ button{
 <div class="container">
 <div class="card">
 
-<h1>🤖 AI PHÂN TÍCH KHUNG GIỜ ĐẸP NHẤT</h1>
+<h1>🤖 AI RADAR PHÂN TÍCH</h1>
 
-<button onclick="runAI()">Phân Tích Theo Ngày</button>
-
-<div class="progress">
-<div class="bar" id="bar"></div>
+<div class="radar">
+<div class="scan"></div>
 </div>
 
+<button onclick="runAI()">Bắt Đầu Phân Tích</button>
+
+<div id="deviceInfo" class="small"></div>
 <div id="output" class="result"></div>
 
 </div>
@@ -86,87 +119,72 @@ function minutesToTime(min){
   return (h<10?"0"+h:h)+":"+(m<10?"0"+m:m);
 }
 
-function countdownTo(startMin){
-  let now=new Date();
-  let current=now.getHours()*60+now.getMinutes();
-  let diff=startMin-current;
-  return diff+" phút";
-}
-
-function getDailySeed(){
-  let d=new Date();
-  return d.getFullYear()*10000 + (d.getMonth()+1)*100 + d.getDate();
-}
-
-function seededRandom(seed){
-  let x = Math.sin(seed++) * 10000;
-  return x - Math.floor(x);
+function seedFromString(str){
+  let hash=0;
+  for(let i=0;i<str.length;i++){
+    hash=str.charCodeAt(i)+((hash<<5)-hash);
+  }
+  return hash;
 }
 
 function runAI(){
 
-  let bar=document.getElementById("bar");
-  bar.style.width="0%";
   document.getElementById("output").innerHTML=
-  "🔍 AI đang phân tích theo ngày & giờ hiện tại...";
+  "🔍 AI đang quét thiết bị và phân tích...";
 
-  let progress=0;
-  let interval=setInterval(()=>{
-    progress+=5;
-    bar.style.width=progress+"%";
-    if(progress>=100){
-      clearInterval(interval);
-      generateResult();
+  let userAgent=navigator.userAgent;
+  let seed=seedFromString(userAgent);
+
+  let now=new Date();
+  let currentMin=now.getHours()*60+now.getMinutes();
+
+  let bestScore=0;
+  let bestStart=0;
+  let bestEnd=0;
+
+  for(let i=0;i<40;i++){
+
+    let rand=Math.abs(Math.sin(seed+i))*10000;
+    rand=rand-Math.floor(rand);
+
+    let start=currentMin+5+Math.floor(rand*600);
+    let duration=10+Math.floor(rand*30);
+    let end=start+duration;
+
+    let score=Math.floor(rand*100);
+
+    if(score>bestScore){
+      bestScore=score;
+      bestStart=start;
+      bestEnd=end;
     }
-  },100);
-
-  function generateResult(){
-
-    let now=new Date();
-    let currentMin=now.getHours()*60+now.getMinutes();
-
-    let dailySeed=getDailySeed();
-    let bestScore=0;
-    let bestStart=0;
-    let bestEnd=0;
-
-    for(let i=0;i<40;i++){
-
-      // Chỉ lấy khung sắp tới trong 12 giờ tới
-      let start=currentMin+5+Math.floor(Math.random()*720);
-      let duration=10+Math.floor(Math.random()*30);
-      let end=start+duration;
-
-      // RNG theo ngày
-      let dailyFactor=seededRandom(dailySeed+i)*100;
-
-      // Độ gần hiện tại
-      let proximity=100-(start-currentMin)/8;
-
-      // Điểm tổng hợp
-      let score=(dailyFactor*0.5)+(proximity*0.5);
-
-      score=Math.floor(Math.min(98,score));
-
-      if(score>bestScore){
-        bestScore=score;
-        bestStart=start;
-        bestEnd=end;
-      }
-    }
-
-    document.getElementById("output").innerHTML=`
-      📅 Ngày: ${now.toLocaleDateString()}<br><br>
-      🔥 KHUNG GIỜ ĐẸP NHẤT SẮP TỚI:<br>
-      <div class="highlight">
-      ${minutesToTime(bestStart)} - ${minutesToTime(bestEnd)}
-      </div><br>
-      📊 Độ thuận lợi: <b>${bestScore}%</b><br>
-      ⏳ Còn ${countdownTo(bestStart)} nữa
-    `;
   }
 
+  document.getElementById("output").innerHTML=`
+    🔥 KHUNG GIỜ RIÊNG CHO THIẾT BỊ NÀY:<br><br>
+    <div class="highlight">
+    ${minutesToTime(bestStart)} - ${minutesToTime(bestEnd)}
+    </div><br>
+    📊 Điểm AI: ${bestScore}%<br>
+    <div class="small">
+    ⚠️ Mỗi thiết bị sẽ có khung giờ khác nhau
+    </div>
+  `;
+
 }
+
+/* Lấy IP nếu có internet */
+
+fetch("https://api.ipify.org?format=json")
+.then(res=>res.json())
+.then(data=>{
+  document.getElementById("deviceInfo").innerHTML=
+  "🌐 IP: "+data.ip+"<br>📱 Thiết bị: "+navigator.userAgent;
+})
+.catch(()=>{
+  document.getElementById("deviceInfo").innerHTML=
+  "📱 Thiết bị: "+navigator.userAgent;
+});
 
 </script>
 
