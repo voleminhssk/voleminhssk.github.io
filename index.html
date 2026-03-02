@@ -3,79 +3,70 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VIP Auto Countdown</title>
+<title>AI Phân Tích Casino</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
 body{
-  font-family:'Segoe UI',sans-serif;
-  background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+  margin:0;
+  background:#0c0f1f;
+  font-family:Segoe UI;
   color:white;
-  padding:20px;
-  transition:background 0.6s ease;
+  text-align:center;
 }
 .container{
-  max-width:1000px;
+  max-width:900px;
   margin:auto;
-  background:rgba(0,0,0,0.65);
-  backdrop-filter:blur(12px);
+  padding:30px;
+}
+.card{
+  background:rgba(20,25,50,0.95);
   padding:30px;
   border-radius:20px;
-  box-shadow:0 0 40px rgba(255,215,0,0.4);
+  box-shadow:0 0 40px #00f7ff33;
 }
 h1{
-  text-align:center;
-  color:gold;
-  margin-bottom:20px;
-  text-shadow:0 0 15px gold;
+  color:#00f7ff;
+  text-shadow:0 0 15px #00f7ff;
 }
-.clock{
-  text-align:center;
-  font-size:22px;
-  margin-bottom:25px;
-  color:#00ffff;
-}
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-th{
-  background:gold;
-  color:black;
+select,button{
   padding:12px;
+  margin:10px;
+  border-radius:12px;
+  border:none;
+  font-size:16px;
 }
-td{
-  padding:12px;
-  text-align:center;
-  border-bottom:1px solid rgba(255,255,255,0.1);
-}
-.match{
-  background:linear-gradient(45deg,#00ff99,#00cc66);
-  color:black;
+button{
+  background:#00f7ff;
   font-weight:bold;
-  box-shadow:0 0 20px #00ff99;
+  cursor:pointer;
 }
-.wait{
-  background:linear-gradient(45deg,#ff4e50,#f00000);
-}
-.popup{
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%) scale(0.8);
-  background:black;
-  padding:40px;
+.progress{
+  width:100%;
+  height:20px;
+  background:#111;
   border-radius:20px;
-  border:3px solid gold;
-  font-size:24px;
-  text-align:center;
-  display:none;
-  z-index:9999;
-  box-shadow:0 0 60px gold;
-  animation:popupAnim 0.4s ease forwards;
+  overflow:hidden;
+  margin-top:20px;
 }
-@keyframes popupAnim{
-  to{transform:translate(-50%,-50%) scale(1);}
+.bar{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#00f7ff,#00ff88);
+}
+.result{
+  margin-top:25px;
+  font-size:18px;
+}
+.box{
+  margin-top:15px;
+  padding:15px;
+  border-radius:15px;
+  background:#111633;
+  box-shadow:0 0 15px #00ff8855;
+}
+.highlight{
+  font-size:22px;
+  color:#00ff88;
 }
 </style>
 </head>
@@ -83,153 +74,129 @@ td{
 <body>
 
 <div class="container">
-<h1>🔥 VIP AUTO COUNTDOWN 🔥</h1>
-<div class="clock">
-⏰ Giờ hiện tại: <span id="currentTime"></span>
+<div class="card">
+
+<h1>🤖 AI CASINO PRO</h1>
+
+<select id="game">
+<option>Quyết Chiến</option>
+<option>Mạc Chược 1</option>
+<option>Mạc Chược 2</option>
+</select>
+
+<br>
+<button onclick="runAI()">Phân Tích AI</button>
+
+<div class="progress">
+<div class="bar" id="bar"></div>
 </div>
 
-<table>
-<tr>
-<th>Khung giờ</th>
-<th>Trạng thái</th>
-<th>Đếm ngược</th>
-</tr>
-<tbody id="tableBody"></tbody>
-</table>
-</div>
+<div id="output" class="result"></div>
 
-<div class="popup" id="popup"></div>
+</div>
+</div>
 
 <script>
 
-const timeSlots=[
-{start:"12:10",end:"12:35"},
-{start:"12:40",end:"13:10"},
-{start:"13:05",end:"13:40"},
-{start:"17:15",end:"17:35"},
-{start:"18:55",end:"19:25"},
-{start:"19:48",end:"19:59"},
-{start:"20:50",end:"21:20"},
-{start:"21:25",end:"21:55"},
-{start:"21:30",end:"22:05"},
-{start:"22:40",end:"23:45"}
-];
-
-let activeSlots=[];
-let firstLoad=true;
-
-function toMin(t){
-let [h,m]=t.split(":").map(Number);
-return h*60+m;
+function minutesToTime(min){
+  let h=Math.floor(min/60)%24;
+  let m=min%60;
+  return (h<10?"0"+h:h)+":"+(m<10?"0"+m:m);
 }
 
-function pad(n){return n<10?"0"+n:n;}
-
-function showPopup(text){
-let p=document.getElementById("popup");
-p.innerText=text;
-p.style.display="block";
-setTimeout(()=>p.style.display="none",3500);
+function countdownTo(startMin){
+  let now=new Date();
+  let current=now.getHours()*60+now.getMinutes();
+  let diff=startMin-current;
+  if(diff<0) diff+=1440;
+  return diff+" phút";
 }
 
-function update(){
+function runAI(){
 
-let now=new Date();
-let nowMin=now.getHours()*60+now.getMinutes();
-let nowSec=now.getSeconds();
+  let game=document.getElementById("game").value;
 
-document.getElementById("currentTime").innerText=
-pad(now.getHours())+":"+pad(now.getMinutes())+":"+pad(now.getSeconds());
+  document.getElementById("output").innerHTML=
+  "🔍 AI đang phân tích "+game+"...";
 
-let data=[];
+  let bar=document.getElementById("bar");
+  bar.style.width="0%";
 
-timeSlots.forEach((slot,i)=>{
-let start=toMin(slot.start);
-let end=toMin(slot.end);
+  let progress=0;
+  let interval=setInterval(()=>{
+    progress+=4;
+    bar.style.width=progress+"%";
+    if(progress>=100){
+      clearInterval(interval);
+      generateResult();
+    }
+  },100);
 
-let inSlot=(nowMin>=start && nowMin<end);
-let diffStart=start-nowMin;
-if(diffStart<0) diffStart+=1440;
+  function generateResult(){
 
-let remainingSeconds=(end*60)-(nowMin*60+nowSec);
+    let now=new Date();
+    let currentMin=now.getHours()*60+now.getMinutes();
 
-data.push({i,start,end,inSlot,diffStart,remainingSeconds,raw:slot});
-});
+    let results=[];
 
-data.sort((a,b)=>{
-if(a.inSlot&&!b.inSlot) return -1;
-if(!a.inSlot&&b.inSlot) return 1;
-return a.diffStart-b.diffStart;
-});
+    for(let i=0;i<30;i++){
 
-let html="";
-let currentActive=[];
-let anyActive=false;
+      let range=720;
+      let start=currentMin+Math.floor(Math.random()*range);
+      let duration=10+Math.floor(Math.random()*35);
+      let end=start+duration;
 
-data.forEach(d=>{
-let status="";
-let countdown="";
+      let volatility=Math.random()*100;
+      let proximity=Math.max(0,100-Math.abs(start-currentMin)/4);
 
-if(d.inSlot){
-anyActive=true;
-currentActive.push(d.i);
+      let weightGame=0;
 
-let min=Math.floor(d.remainingSeconds/60);
-let sec=d.remainingSeconds%60;
-if(min<0){min=0;sec=0;}
+      if(game==="Quyết Chiến") weightGame=0.7;
+      if(game==="Mạc Chược 1") weightGame=0.6;
+      if(game==="Mạc Chược 2") weightGame=0.65;
 
-status="ĐANG TRONG KHUNG";
-countdown=pad(min)+" : "+pad(sec);
-}else{
-status="SẮP TỚI";
-countdown="Còn "+d.diffStart+" phút";
-}
+      let score=Math.floor(
+        (volatility*weightGame)+(proximity*(1-weightGame))
+      );
 
-html+=`
-<tr>
-<td>${d.raw.start} - ${d.raw.end}</td>
-<td class="${d.inSlot?'match':'wait'}">${status}</td>
-<td>${countdown}</td>
-</tr>
-`;
-});
+      score=Math.min(97,score);
 
-document.getElementById("tableBody").innerHTML=html;
+      results.push({
+        start:start,
+        end:end,
+        score:score
+      });
+    }
 
-if(firstLoad){
-if(anyActive){
-showPopup("🔥 HIỆN ĐANG TRONG KHUNG GIỜ 🔥");
-document.body.style.background="linear-gradient(135deg,#003300,#009933)";
-}else{
-showPopup("⏳ KHUNG GẦN NHẤT SAU "+data[0].diffStart+" PHÚT");
-}
-firstLoad=false;
-}
+    results.sort((a,b)=>b.score-a.score);
 
-currentActive.forEach(i=>{
-if(!activeSlots.includes(i)){
-showPopup("🔥 BẮT ĐẦU KHUNG GIỜ 🔥");
-}
-});
+    let best1=results[0];
+    let best2=results[1];
 
-activeSlots.forEach(i=>{
-if(!currentActive.includes(i)){
-showPopup("⛔ KHUNG GIỜ ĐÃ KẾT THÚC ⛔");
-}
-});
+    document.getElementById("output").innerHTML=`
+      🎮 Game: <b>${game}</b><br><br>
 
-activeSlots=currentActive;
+      <div class="box">
+        🥇 KHUNG MẠNH NHẤT<br>
+        <div class="highlight">
+        ${minutesToTime(best1.start)} - ${minutesToTime(best1.end)}
+        </div>
+        📊 ${best1.score}%<br>
+        ⏳ Còn ${countdownTo(best1.start)}
+      </div>
 
-if(anyActive){
-document.body.style.background="linear-gradient(135deg,#003300,#009933)";
-}else{
-document.body.style.background="linear-gradient(135deg,#0f2027,#203a43,#2c5364)";
-}
+      <div class="box">
+        🥈 KHUNG THỨ 2<br>
+        <div class="highlight">
+        ${minutesToTime(best2.start)} - ${minutesToTime(best2.end)}
+        </div>
+        📊 ${best2.score}%<br>
+        ⏳ Còn ${countdownTo(best2.start)}
+      </div>
+    `;
+  }
 
 }
-
-setInterval(update,1000);
-update();
 
 </script>
 
