@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>SHA256 Tài Xỉu AI</title>
+<title>MD5 Flexible AI Tài Xỉu</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
 <style>
@@ -46,20 +46,23 @@ button{
 </head>
 <body>
 
-<h2>🔐 SHA256 AI DỰ ĐOÁN TÀI XỈU 🔥</h2>
+<h2>🔥 MD5 AI FLEXIBLE PREDICT 🔥</h2>
 
-<input type="text" id="hashInput" placeholder="Nhập SHA256 hash...">
+<input type="text" id="hashInput" placeholder="Nhập bất kỳ chuỗi / md5...">
 <br><br>
 <button onclick="analyze()">Phân Tích</button>
 
-<div class="loading" id="loading">⚡ AI đang phân tích SHA256...</div>
+<div class="loading" id="loading">⚡ AI đang chuẩn hóa dữ liệu...</div>
 <div class="card" id="resultCard"></div>
 
 <script>
 
-function sha256ToDice(hash){
+function isValidMD5(str){
+    return /^[a-f0-9]{32}$/i.test(str);
+}
 
-    // Lấy 6 ký tự đầu
+function generateDiceFromHash(hash){
+
     let part1 = hash.substring(0,2);
     let part2 = hash.substring(2,4);
     let part3 = hash.substring(4,6);
@@ -73,12 +76,12 @@ function sha256ToDice(hash){
 
 function analyze(){
 
-    let input = document.getElementById("hashInput").value.trim().toLowerCase();
+    let input = document.getElementById("hashInput").value.trim();
     let loading = document.getElementById("loading");
     let card = document.getElementById("resultCard");
 
-    if(input.length !== 64){
-        alert("Hash SHA256 phải đủ 64 ký tự!");
+    if(input.length === 0){
+        alert("Vui lòng nhập dữ liệu!");
         return;
     }
 
@@ -87,16 +90,25 @@ function analyze(){
 
     setTimeout(()=>{
 
-        loading.style.display="none";
+        let finalHash;
 
-        let dice = sha256ToDice(input);
+        if(isValidMD5(input)){
+            finalHash = input.toLowerCase();
+        }else{
+            // Tự hash lại nếu không phải MD5 chuẩn
+            finalHash = CryptoJS.MD5(input).toString();
+        }
+
+        let dice = generateDiceFromHash(finalHash);
         let total = dice[0] + dice[1] + dice[2];
         let result = total >= 11 ? "TÀI 🔥" : "XỈU ❄";
 
-        // Độ nghiêng xác suất mô phỏng
-        let confidence = ((parseInt(input.substring(0,8),16) % 30) + 70);
+        let confidence = ((parseInt(finalHash.substring(0,8),16) % 25) + 75);
+
+        loading.style.display="none";
 
         card.innerHTML = `
+            🔐 MD5 sử dụng: <br><b>${finalHash}</b><br><br>
             🎲 Xúc xắc AI: <b>${dice[0]} - ${dice[1]} - ${dice[2]}</b><br><br>
             🔢 Tổng: <b>${total}</b><br><br>
             🔥 Dự đoán: <b>${result}</b><br><br>
@@ -105,7 +117,7 @@ function analyze(){
 
         card.style.display="block";
 
-    },1200);
+    },1000);
 }
 
 </script>
