@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Radar Until Midnight</title>
+<title>AI Radar</title>
 
 <style>
 body{
@@ -44,6 +44,7 @@ select{
   border:none;
   margin:15px 0;
   font-size:16px;
+  cursor:pointer;
 }
 
 .radar{
@@ -97,11 +98,11 @@ select{
 <div class="container">
 <div class="card">
 
-<h1>🤖 AI REALTIME SCAN (ĐẾN 23:59)</h1>
+<h1>🤖 AI REALTIME AUTO SWITCH</h1>
 
 <div class="clock" id="clock"></div>
 
-<select id="game" onchange="generateWindow()">
+<select id="game">
 <option>Quyết Chiến</option>
 <option>Mạc Chược 1</option>
 <option>Mạc Chược 2</option>
@@ -121,6 +122,8 @@ select{
 <script>
 
 let currentWindow=null;
+let currentGame="";
+let lastGame="";
 
 function formatTime(date){
   return date.toLocaleTimeString();
@@ -157,14 +160,14 @@ function generateWindow(){
     return;
   }
 
-  let game=document.getElementById("game").value;
-  let seed=seedFromString(game+navigator.userAgent+currentMin);
+  currentGame=document.getElementById("game").value;
+
+  let seed=seedFromString(currentGame+navigator.userAgent+currentMin);
 
   let bestScore=0;
   let bestStart=currentMin;
   let bestEnd=currentMin+5;
 
-  // chỉ quét tới 23:59
   for(let i=0;i<80;i++){
 
     let rand=Math.abs(Math.sin(seed+i))*10000;
@@ -223,7 +226,11 @@ function update(){
   document.getElementById("clock").innerHTML=
     "🕒 Thời gian hiện tại: "+formatTime(now);
 
-  if(!currentWindow){
+  let selectedGame=document.getElementById("game").value;
+
+  // Nếu đổi game → quét lại ngay
+  if(selectedGame !== lastGame){
+    lastGame = selectedGame;
     generateWindow();
   }
 
@@ -242,6 +249,7 @@ function update(){
     if(minsToEnd<0) minsToEnd=0;
 
     document.getElementById("output").innerHTML=`
+      🎮 Game: ${selectedGame}<br><br>
       🔥 KHUNG GIỜ PHÁT HIỆN:<br><br>
       <div class="highlight">
       ${minutesToTime(currentWindow.start)} - ${minutesToTime(currentWindow.end)}
@@ -253,6 +261,7 @@ function update(){
   }
 }
 
+lastGame=document.getElementById("game").value;
 generateWindow();
 setInterval(update,1000);
 
