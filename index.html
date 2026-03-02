@@ -3,39 +3,36 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Phân Tích Casino</title>
+<title>AI Phân Tích Khung Giờ</title>
 
 <style>
 body{
   margin:0;
-  background:#0c0f1f;
+  background:#0b0f1d;
   font-family:Segoe UI;
   color:white;
   text-align:center;
 }
 .container{
-  max-width:900px;
+  max-width:850px;
   margin:auto;
   padding:30px;
 }
 .card{
-  background:rgba(20,25,50,0.95);
+  background:rgba(18,22,45,0.95);
   padding:30px;
   border-radius:20px;
-  box-shadow:0 0 40px #00f7ff33;
+  box-shadow:0 0 35px #00f7ff33;
 }
 h1{
   color:#00f7ff;
   text-shadow:0 0 15px #00f7ff;
 }
-select,button{
-  padding:12px;
-  margin:10px;
-  border-radius:12px;
-  border:none;
-  font-size:16px;
-}
 button{
+  padding:14px 25px;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
   background:#00f7ff;
   font-weight:bold;
   cursor:pointer;
@@ -46,7 +43,7 @@ button{
   background:#111;
   border-radius:20px;
   overflow:hidden;
-  margin-top:20px;
+  margin-top:25px;
 }
 .bar{
   height:100%;
@@ -54,18 +51,10 @@ button{
   background:linear-gradient(90deg,#00f7ff,#00ff88);
 }
 .result{
-  margin-top:25px;
-  font-size:18px;
-}
-.box{
-  margin-top:15px;
-  padding:15px;
-  border-radius:15px;
-  background:#111633;
-  box-shadow:0 0 15px #00ff8855;
+  margin-top:30px;
 }
 .highlight{
-  font-size:22px;
+  font-size:26px;
   color:#00ff88;
 }
 </style>
@@ -76,16 +65,9 @@ button{
 <div class="container">
 <div class="card">
 
-<h1>🤖 AI CASINO PRO</h1>
+<h1>🤖 AI PHÂN TÍCH KHUNG GIỜ ĐẸP NHẤT</h1>
 
-<select id="game">
-<option>Quyết Chiến</option>
-<option>Mạc Chược 1</option>
-<option>Mạc Chược 2</option>
-</select>
-
-<br>
-<button onclick="runAI()">Phân Tích AI</button>
+<button onclick="runAI()">Phân Tích Theo Ngày</button>
 
 <div class="progress">
 <div class="bar" id="bar"></div>
@@ -108,23 +90,29 @@ function countdownTo(startMin){
   let now=new Date();
   let current=now.getHours()*60+now.getMinutes();
   let diff=startMin-current;
-  if(diff<0) diff+=1440;
   return diff+" phút";
+}
+
+function getDailySeed(){
+  let d=new Date();
+  return d.getFullYear()*10000 + (d.getMonth()+1)*100 + d.getDate();
+}
+
+function seededRandom(seed){
+  let x = Math.sin(seed++) * 10000;
+  return x - Math.floor(x);
 }
 
 function runAI(){
 
-  let game=document.getElementById("game").value;
-
-  document.getElementById("output").innerHTML=
-  "🔍 AI đang phân tích "+game+"...";
-
   let bar=document.getElementById("bar");
   bar.style.width="0%";
+  document.getElementById("output").innerHTML=
+  "🔍 AI đang phân tích theo ngày & giờ hiện tại...";
 
   let progress=0;
   let interval=setInterval(()=>{
-    progress+=4;
+    progress+=5;
     bar.style.width=progress+"%";
     if(progress>=100){
       clearInterval(interval);
@@ -137,62 +125,44 @@ function runAI(){
     let now=new Date();
     let currentMin=now.getHours()*60+now.getMinutes();
 
-    let results=[];
+    let dailySeed=getDailySeed();
+    let bestScore=0;
+    let bestStart=0;
+    let bestEnd=0;
 
-    for(let i=0;i<30;i++){
+    for(let i=0;i<40;i++){
 
-      let range=720;
-      let start=currentMin+Math.floor(Math.random()*range);
-      let duration=10+Math.floor(Math.random()*35);
+      // Chỉ lấy khung sắp tới trong 12 giờ tới
+      let start=currentMin+5+Math.floor(Math.random()*720);
+      let duration=10+Math.floor(Math.random()*30);
       let end=start+duration;
 
-      let volatility=Math.random()*100;
-      let proximity=Math.max(0,100-Math.abs(start-currentMin)/4);
+      // RNG theo ngày
+      let dailyFactor=seededRandom(dailySeed+i)*100;
 
-      let weightGame=0;
+      // Độ gần hiện tại
+      let proximity=100-(start-currentMin)/8;
 
-      if(game==="Quyết Chiến") weightGame=0.7;
-      if(game==="Mạc Chược 1") weightGame=0.6;
-      if(game==="Mạc Chược 2") weightGame=0.65;
+      // Điểm tổng hợp
+      let score=(dailyFactor*0.5)+(proximity*0.5);
 
-      let score=Math.floor(
-        (volatility*weightGame)+(proximity*(1-weightGame))
-      );
+      score=Math.floor(Math.min(98,score));
 
-      score=Math.min(97,score);
-
-      results.push({
-        start:start,
-        end:end,
-        score:score
-      });
+      if(score>bestScore){
+        bestScore=score;
+        bestStart=start;
+        bestEnd=end;
+      }
     }
 
-    results.sort((a,b)=>b.score-a.score);
-
-    let best1=results[0];
-    let best2=results[1];
-
     document.getElementById("output").innerHTML=`
-      🎮 Game: <b>${game}</b><br><br>
-
-      <div class="box">
-        🥇 KHUNG MẠNH NHẤT<br>
-        <div class="highlight">
-        ${minutesToTime(best1.start)} - ${minutesToTime(best1.end)}
-        </div>
-        📊 ${best1.score}%<br>
-        ⏳ Còn ${countdownTo(best1.start)}
-      </div>
-
-      <div class="box">
-        🥈 KHUNG THỨ 2<br>
-        <div class="highlight">
-        ${minutesToTime(best2.start)} - ${minutesToTime(best2.end)}
-        </div>
-        📊 ${best2.score}%<br>
-        ⏳ Còn ${countdownTo(best2.start)}
-      </div>
+      📅 Ngày: ${now.toLocaleDateString()}<br><br>
+      🔥 KHUNG GIỜ ĐẸP NHẤT SẮP TỚI:<br>
+      <div class="highlight">
+      ${minutesToTime(bestStart)} - ${minutesToTime(bestEnd)}
+      </div><br>
+      📊 Độ thuận lợi: <b>${bestScore}%</b><br>
+      ⏳ Còn ${countdownTo(bestStart)} nữa
     `;
   }
 
