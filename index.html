@@ -3,11 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VIP Time Tracker</title>
+<title>VIP Auto Countdown</title>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-
 body{
   font-family:'Segoe UI',sans-serif;
   background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
@@ -15,59 +14,50 @@ body{
   padding:20px;
   transition:background 0.6s ease;
 }
-
 .container{
-  max-width:900px;
+  max-width:1000px;
   margin:auto;
-  background:rgba(0,0,0,0.6);
+  background:rgba(0,0,0,0.65);
   backdrop-filter:blur(12px);
   padding:30px;
   border-radius:20px;
-  box-shadow:0 0 40px rgba(255,215,0,0.3);
+  box-shadow:0 0 40px rgba(255,215,0,0.4);
 }
-
 h1{
   text-align:center;
   color:gold;
   margin-bottom:20px;
   text-shadow:0 0 15px gold;
 }
-
 .clock{
   text-align:center;
   font-size:22px;
   margin-bottom:25px;
   color:#00ffff;
 }
-
 table{
   width:100%;
   border-collapse:collapse;
 }
-
 th{
   background:gold;
   color:black;
   padding:12px;
 }
-
 td{
-  padding:14px;
+  padding:12px;
   text-align:center;
   border-bottom:1px solid rgba(255,255,255,0.1);
 }
-
 .match{
   background:linear-gradient(45deg,#00ff99,#00cc66);
   color:black;
   font-weight:bold;
-  box-shadow:0 0 15px #00ff99;
+  box-shadow:0 0 20px #00ff99;
 }
-
 .wait{
   background:linear-gradient(45deg,#ff4e50,#f00000);
 }
-
 .popup{
   position:fixed;
   top:50%;
@@ -81,17 +71,11 @@ td{
   text-align:center;
   display:none;
   z-index:9999;
-  box-shadow:0 0 50px gold;
+  box-shadow:0 0 60px gold;
   animation:popupAnim 0.4s ease forwards;
 }
-
 @keyframes popupAnim{
   to{transform:translate(-50%,-50%) scale(1);}
-}
-
-@media(max-width:600px){
-  td,th{font-size:14px;padding:10px;}
-  .popup{font-size:18px;padding:25px;}
 }
 </style>
 </head>
@@ -99,8 +83,7 @@ td{
 <body>
 
 <div class="container">
-<h1>🔥 VIP TIME SLOT 🔥</h1>
-
+<h1>🔥 VIP AUTO COUNTDOWN 🔥</h1>
 <div class="clock">
 ⏰ Giờ hiện tại: <span id="currentTime"></span>
 </div>
@@ -109,11 +92,10 @@ td{
 <tr>
 <th>Khung giờ</th>
 <th>Trạng thái</th>
-<th>Thời gian</th>
+<th>Đếm ngược</th>
 </tr>
 <tbody id="tableBody"></tbody>
 </table>
-
 </div>
 
 <div class="popup" id="popup"></div>
@@ -121,7 +103,14 @@ td{
 <script>
 
 const timeSlots=[
-{start:"00:00",end:"03:00"},
+{start:"12:10",end:"12:35"},
+{start:"12:40",end:"13:10"},
+{start:"13:05",end:"13:40"},
+{start:"17:15",end:"17:35"},
+{start:"18:55",end:"19:25"},
+{start:"19:48",end:"19:59"},
+{start:"20:50",end:"21:20"},
+{start:"21:25",end:"21:55"},
 {start:"21:30",end:"22:05"},
 {start:"22:40",end:"23:45"}
 ];
@@ -159,17 +148,18 @@ let start=toMin(slot.start);
 let end=toMin(slot.end);
 
 let inSlot=(nowMin>=start && nowMin<end);
+let diffStart=start-nowMin;
+if(diffStart<0) diffStart+=1440;
 
-let diff=start-nowMin;
-if(diff<0) diff+=1440;
+let remainingSeconds=(end*60)-(nowMin*60+nowSec);
 
-data.push({i,start,end,diff,inSlot,raw:slot});
+data.push({i,start,end,inSlot,diffStart,remainingSeconds,raw:slot});
 });
 
 data.sort((a,b)=>{
 if(a.inSlot&&!b.inSlot) return -1;
 if(!a.inSlot&&b.inSlot) return 1;
-return a.diff-b.diff;
+return a.diffStart-b.diffStart;
 });
 
 let html="";
@@ -178,27 +168,28 @@ let anyActive=false;
 
 data.forEach(d=>{
 let status="";
-let detail="";
+let countdown="";
 
 if(d.inSlot){
-let remainMin=d.end-nowMin-1;
-let remainSec=60-nowSec;
-if(remainSec===60) remainSec=0;
+anyActive=true;
+currentActive.push(d.i);
+
+let min=Math.floor(d.remainingSeconds/60);
+let sec=d.remainingSeconds%60;
+if(min<0){min=0;sec=0;}
 
 status="ĐANG TRONG KHUNG";
-detail=remainMin+" phút "+remainSec+" giây";
-currentActive.push(d.i);
-anyActive=true;
+countdown=pad(min)+" : "+pad(sec);
 }else{
 status="SẮP TỚI";
-detail="Còn "+d.diff+" phút";
+countdown="Còn "+d.diffStart+" phút";
 }
 
 html+=`
 <tr>
 <td>${d.raw.start} - ${d.raw.end}</td>
 <td class="${d.inSlot?'match':'wait'}">${status}</td>
-<td>${detail}</td>
+<td>${countdown}</td>
 </tr>
 `;
 });
@@ -210,7 +201,7 @@ if(anyActive){
 showPopup("🔥 HIỆN ĐANG TRONG KHUNG GIỜ 🔥");
 document.body.style.background="linear-gradient(135deg,#003300,#009933)";
 }else{
-showPopup("⏳ KHUNG GẦN NHẤT SAU "+data[0].diff+" PHÚT");
+showPopup("⏳ KHUNG GẦN NHẤT SAU "+data[0].diffStart+" PHÚT");
 }
 firstLoad=false;
 }
