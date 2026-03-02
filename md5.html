@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>SICBO HASH CHECKER</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+<style>
+body{
+    background:#0f172a;
+    font-family:Arial;
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+.container{
+    background:#1e293b;
+    padding:30px;
+    border-radius:15px;
+    width:420px;
+    box-shadow:0 0 20px rgba(0,0,0,0.5);
+}
+h2{
+    text-align:center;
+    color:#facc15;
+}
+select,input,button{
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+    border-radius:8px;
+    border:none;
+}
+input{
+    background:#0f172a;
+    color:white;
+}
+button{
+    background:#facc15;
+    font-weight:bold;
+    cursor:pointer;
+}
+.result{
+    margin-top:15px;
+    padding:10px;
+    background:#0f172a;
+    border-radius:8px;
+    text-align:center;
+}
+.success{color:#22c55e;}
+.fail{color:#ef4444;}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>SICBO HASH CHECKER</h2>
+
+    <label>Chọn Website</label>
+    <select id="siteSelect">
+        <option value="Sunwin">Sicbo Sunwin</option>
+        <option value="B52">Tài Xỉu B52</option>
+    </select>
+
+    <label>Nhập MD5</label>
+    <input type="text" id="md5Input" placeholder="Nhập chuỗi MD5...">
+
+    <button onclick="checkResult()">Kiểm Tra</button>
+
+    <div class="result" id="resultBox"></div>
+</div>
+
+<script>
+
+let hashMap = {};
+
+async function loadTXT(){
+    const response = await fetch("SICBO_SHA256_1-1-1_to_6-6-6.txt");
+    const text = await response.text();
+    const lines = text.split("\n");
+
+    lines.forEach(line=>{
+        line = line.trim();
+        if(line.includes("->")){
+            const parts = line.split("->");
+            const dice = parts[0].trim();
+            const hash = parts[1].trim();
+            hashMap[hash] = dice;
+        }
+    });
+}
+
+loadTXT();
+
+function checkResult(){
+
+    const md5 = document.getElementById("md5Input").value.trim();
+    const resultBox = document.getElementById("resultBox");
+    const siteName = document.getElementById("siteSelect").selectedOptions[0].text;
+
+    if(md5.length !== 32){
+        resultBox.innerHTML = "<span class='fail'>MD5 không hợp lệ</span>";
+        return;
+    }
+
+    const sha256 = CryptoJS.SHA256(md5).toString();
+
+    if(hashMap[sha256]){
+        const dice = hashMap[sha256];
+        const total = dice.split("-").reduce((a,b)=>a+parseInt(b),0);
+        const taiXiu = total >= 11 ? "TÀI" : "XỈU";
+
+        resultBox.innerHTML = `
+        <span class='success'>
+        Website: ${siteName}<br>
+        Kết quả: ${dice}<br>
+        Tổng: ${total} (${taiXiu})
+        </span>
+        `;
+    }else{
+        resultBox.innerHTML = "<span class='fail'>Không tìm thấy trong list</span>";
+    }
+}
+
+</script>
+
+</body>
+</html>
