@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Radar</title>
+<title>AI Radar 30-40p Window</title>
 
 <style>
 body{
@@ -98,7 +98,7 @@ select{
 <div class="container">
 <div class="card">
 
-<h1>🤖 AI REALTIME AUTO SWITCH</h1>
+<h1>🤖 AI SCAN 30–40 PHÚT</h1>
 
 <div class="clock" id="clock"></div>
 
@@ -122,7 +122,6 @@ select{
 <script>
 
 let currentWindow=null;
-let currentGame="";
 let lastGame="";
 
 function formatTime(date){
@@ -153,38 +152,40 @@ function generateWindow(){
   let currentMin=minutesOfDay(now);
   let endOfDay=23*60+59;
 
-  if(currentMin>=endOfDay){
+  // Không tạo khung nếu còn dưới 40 phút tới 00:00
+  if(endOfDay-currentMin < 40){
     currentWindow=null;
     document.getElementById("output").innerHTML=
-      "⛔ ĐÃ KẾT THÚC NGÀY HÔM NAY";
+      "⛔ Không tạo khung mới vì quá sát ngày mới";
     return;
   }
 
-  currentGame=document.getElementById("game").value;
-
-  let seed=seedFromString(currentGame+navigator.userAgent+currentMin);
+  let game=document.getElementById("game").value;
+  let seed=seedFromString(game+navigator.userAgent+currentMin);
 
   let bestScore=0;
   let bestStart=currentMin;
-  let bestEnd=currentMin+5;
+  let bestEnd=currentMin+30;
 
   for(let i=0;i<80;i++){
 
     let rand=Math.abs(Math.sin(seed+i))*10000;
     rand=rand-Math.floor(rand);
 
-    let maxRange=endOfDay-currentMin;
+    let maxRange=(endOfDay-currentMin-40);
     if(maxRange<=0) break;
 
     let start=currentMin + Math.floor(rand*maxRange);
-    let duration=5 + Math.floor(rand*25);
+
+    // Khoảng cách khung 30–40 phút
+    let duration=30 + Math.floor(rand*10); // 30-40p
     let end=start+duration;
 
-    if(end>endOfDay) end=endOfDay;
+    if(end>endOfDay-5) continue;
 
     let score=Math.floor(rand*100);
 
-    if(score>bestScore && start>=currentMin){
+    if(score>bestScore){
       bestScore=score;
       bestStart=start;
       bestEnd=end;
@@ -228,7 +229,6 @@ function update(){
 
   let selectedGame=document.getElementById("game").value;
 
-  // Nếu đổi game → quét lại ngay
   if(selectedGame !== lastGame){
     lastGame = selectedGame;
     generateWindow();
@@ -250,7 +250,7 @@ function update(){
 
     document.getElementById("output").innerHTML=`
       🎮 Game: ${selectedGame}<br><br>
-      🔥 KHUNG GIỜ PHÁT HIỆN:<br><br>
+      🔥 KHUNG GIỜ 30–40 PHÚT:<br><br>
       <div class="highlight">
       ${minutesToTime(currentWindow.start)} - ${minutesToTime(currentWindow.end)}
       </div><br>
