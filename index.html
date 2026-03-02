@@ -3,16 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Radar Scan</title>
+<title>AI Pro</title>
 
 <style>
 body{
   margin:0;
-  background:#050a18;
+  background:#040914;
   font-family:Segoe UI;
   color:white;
   text-align:center;
-  overflow-x:hidden;
 }
 
 .container{
@@ -22,10 +21,10 @@ body{
 }
 
 .card{
-  background:rgba(10,15,35,0.95);
+  background:rgba(10,18,40,0.95);
   padding:30px;
   border-radius:20px;
-  box-shadow:0 0 40px #00f7ff44;
+  box-shadow:0 0 40px #00f7ff33;
 }
 
 h1{
@@ -33,11 +32,15 @@ h1{
   text-shadow:0 0 15px #00f7ff;
 }
 
-button{
-  padding:12px 25px;
-  border:none;
+select,button{
+  padding:12px;
+  margin:10px;
   border-radius:12px;
+  border:none;
   font-size:16px;
+}
+
+button{
   background:#00f7ff;
   font-weight:bold;
   cursor:pointer;
@@ -46,11 +49,11 @@ button{
 /* RADAR */
 
 .radar{
-  width:250px;
-  height:250px;
+  width:280px;
+  height:280px;
   margin:30px auto;
   border-radius:50%;
-  border:2px solid #00f7ff55;
+  border:2px solid #00f7ff44;
   position:relative;
   overflow:hidden;
 }
@@ -60,20 +63,38 @@ button{
   position:absolute;
   width:100%;
   height:100%;
-  background:radial-gradient(circle,#00ff8855 1%,transparent 60%);
+  background:radial-gradient(circle,#00ff8844 1%,transparent 65%);
 }
 
 .scan{
   position:absolute;
   width:100%;
   height:100%;
-  background:conic-gradient(#00f7ff88 0deg,transparent 60deg);
+  background:conic-gradient(#00f7ff99 0deg,transparent 70deg);
   animation:rotate 2s linear infinite;
 }
 
 @keyframes rotate{
   from{transform:rotate(0deg);}
   to{transform:rotate(360deg);}
+}
+
+/* Target dot */
+
+.target{
+  position:absolute;
+  width:12px;
+  height:12px;
+  background:#00ff88;
+  border-radius:50%;
+  box-shadow:0 0 15px #00ff88;
+  animation:pulse 1s infinite;
+}
+
+@keyframes pulse{
+  0%{transform:scale(1);}
+  50%{transform:scale(1.6);}
+  100%{transform:scale(1);}
 }
 
 .result{
@@ -84,10 +105,11 @@ button{
   font-size:24px;
   color:#00ff88;
 }
+
 .small{
   font-size:13px;
   opacity:0.8;
-  margin-top:5px;
+  margin-top:8px;
 }
 </style>
 </head>
@@ -97,15 +119,22 @@ button{
 <div class="container">
 <div class="card">
 
-<h1>🤖 AI RADAR PHÂN TÍCH</h1>
+<h1>🤖 AI RADAR TARGET SCAN</h1>
 
-<div class="radar">
+<select id="game">
+<option>Quyết Chiến</option>
+<option>Mạc Chược 1</option>
+<option>Mạc Chược 2</option>
+<option>Aztec</option>
+<option>Wild Đạo Tặc</option>
+</select>
+
+<div class="radar" id="radar">
 <div class="scan"></div>
 </div>
 
-<button onclick="runAI()">Bắt Đầu Phân Tích</button>
+<button onclick="runAI()">Bắt Đầu Quét</button>
 
-<div id="deviceInfo" class="small"></div>
 <div id="output" class="result"></div>
 
 </div>
@@ -129,11 +158,18 @@ function seedFromString(str){
 
 function runAI(){
 
+  let game=document.getElementById("game").value;
+  let radar=document.getElementById("radar");
+
+  // Xoá target cũ
+  let oldTarget=document.querySelector(".target");
+  if(oldTarget) oldTarget.remove();
+
   document.getElementById("output").innerHTML=
-  "🔍 AI đang quét thiết bị và phân tích...";
+  "🔍 AI đang quét khung giờ từ thời điểm hiện tại...";
 
   let userAgent=navigator.userAgent;
-  let seed=seedFromString(userAgent);
+  let seed=seedFromString(userAgent + game);
 
   let now=new Date();
   let currentMin=now.getHours()*60+now.getMinutes();
@@ -142,13 +178,14 @@ function runAI(){
   let bestStart=0;
   let bestEnd=0;
 
-  for(let i=0;i<40;i++){
+  for(let i=0;i<30;i++){
 
     let rand=Math.abs(Math.sin(seed+i))*10000;
     rand=rand-Math.floor(rand);
 
-    let start=currentMin+5+Math.floor(rand*600);
-    let duration=10+Math.floor(rand*30);
+    // CHỈ từ thời gian hiện tại trở đi (0 -> 8h tới)
+    let start=currentMin+Math.floor(rand*480);
+    let duration=10+Math.floor(rand*25);
     let end=start+duration;
 
     let score=Math.floor(rand*100);
@@ -160,31 +197,33 @@ function runAI(){
     }
   }
 
+  // Tạo chấm target ngẫu nhiên trong radar
+  let target=document.createElement("div");
+  target.className="target";
+
+  let angle=Math.random()*360;
+  let radius=100*Math.random();
+
+  let x=140 + radius*Math.cos(angle*Math.PI/180);
+  let y=140 + radius*Math.sin(angle*Math.PI/180);
+
+  target.style.left=x+"px";
+  target.style.top=y+"px";
+
+  radar.appendChild(target);
+
   document.getElementById("output").innerHTML=`
-    🔥 KHUNG GIỜ RIÊNG CHO THIẾT BỊ NÀY:<br><br>
+    🎮 Game: ${game}<br><br>
+    🔥 KHUNG GIỜ PHÁT HIỆN (từ hiện tại trở đi):<br>
     <div class="highlight">
     ${minutesToTime(bestStart)} - ${minutesToTime(bestEnd)}
     </div><br>
     📊 Điểm AI: ${bestScore}%<br>
     <div class="small">
-    ⚠️ Mỗi thiết bị sẽ có khung giờ khác nhau
+    ⚠️ Mỗi thiết bị & game sẽ có kết quả khác nhau
     </div>
   `;
-
 }
-
-/* Lấy IP nếu có internet */
-
-fetch("https://api.ipify.org?format=json")
-.then(res=>res.json())
-.then(data=>{
-  document.getElementById("deviceInfo").innerHTML=
-  "🌐 IP: "+data.ip+"<br>📱 Thiết bị: "+navigator.userAgent;
-})
-.catch(()=>{
-  document.getElementById("deviceInfo").innerHTML=
-  "📱 Thiết bị: "+navigator.userAgent;
-});
 
 </script>
 
