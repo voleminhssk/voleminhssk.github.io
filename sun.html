@@ -2,17 +2,18 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>AI Soi Cầu</title>
+<title>AI Đối Chiếu (Note Nhắc Nhở)</title>
+
 <style>
 body{
-    background:linear-gradient(135deg,#000,#111,#000);
-    color:gold;
-    font-family:Arial;
+    background: linear-gradient(135deg,#000,#111,#000);
+    color: gold;
+    font-family: Arial, sans-serif;
     text-align:center;
     padding-top:40px;
 }
-.box{
-    width:420px;
+.container{
+    width:460px;
     margin:auto;
     background:#111;
     padding:25px;
@@ -21,11 +22,11 @@ body{
 }
 input{
     width:80%;
-    padding:10px;
+    padding:12px;
     font-size:18px;
     text-align:center;
     border:none;
-    border-radius:5px;
+    border-radius:6px;
 }
 button{
     margin-top:15px;
@@ -33,9 +34,11 @@ button{
     font-size:18px;
     background:gold;
     border:none;
-    border-radius:5px;
+    border-radius:6px;
     cursor:pointer;
 }
+button:hover{background:orange;}
+
 .result{
     margin-top:20px;
     padding:15px;
@@ -43,32 +46,57 @@ button{
     display:none;
     font-size:20px;
 }
-.xiu{background:#002200;color:#00ff00;}
-.tai{background:#330000;color:#ff4444;}
-.neutral{background:#222;color:white;}
-#loading{display:none;margin-top:15px;}
-.note{margin-top:10px;color:#ccc;font-size:14px;}
+
+.xiu{
+    background:#002200;
+    color:#00ff00;
+    box-shadow:0 0 15px #00ff00;
+}
+
+.tai{
+    background:#330000;
+    color:#ff4444;
+    box-shadow:0 0 15px red;
+}
+
+.neutral{
+    background:#222;
+    color:white;
+}
+
+.note{
+    margin-top:10px;
+    font-size:14px;
+    color:#ffcc00;
+}
+
+#loading{
+    display:none;
+    margin-top:15px;
+}
 </style>
 </head>
+
 <body>
 
-<div class="box">
-<h2>🤖 AI Soi Cầu</h2>
-<input type="text" id="inputData" placeholder="Nhập 124 hoặc 7">
-<br>
-<button onclick="analyze()">Phân Tích</button>
-<div id="loading">Đang tổng hợp và đối chiếu...</div>
-<div id="resultBox" class="result"></div>
-<div id="noteBox" class="note"></div>
+<div class="container">
+    <h2>🤖 AI Đối Chiếu Rule Cá Nhân</h2>
+    <input type="text" id="inputData" placeholder="Nhập 134 hoặc 8">
+    <br>
+    <button onclick="analyze()">Phân Tích</button>
+    <div id="loading">Đang phân tích...</div>
+    <div id="resultBox" class="result"></div>
+    <div id="noteBox" class="note"></div>
 </div>
 
 <script>
+
 function analyze(){
 
-let raw=document.getElementById("inputData").value.trim().replace(/\s/g,'');
-let resultBox=document.getElementById("resultBox");
-let noteBox=document.getElementById("noteBox");
-let loading=document.getElementById("loading");
+let raw = document.getElementById("inputData").value.trim().replace(/\s/g,'');
+let resultBox = document.getElementById("resultBox");
+let noteBox = document.getElementById("noteBox");
+let loading = document.getElementById("loading");
 
 resultBox.style.display="none";
 noteBox.innerHTML="";
@@ -79,128 +107,135 @@ setTimeout(()=>{
 loading.style.display="none";
 
 let sum;
-let dicePattern=null;
+let normalized=null;
 
-// Nếu nhập 3 số
+// nhập 3 số
 if(raw.length===3 && /^[1-6]{3}$/.test(raw)){
-dicePattern=raw;
-sum=parseInt(raw[0])+parseInt(raw[1])+parseInt(raw[2]);
+    let arr = raw.split('').map(Number);
+    sum = arr[0]+arr[1]+arr[2];
+    normalized = [...arr].sort((a,b)=>a-b).join('');
 }
-// Nếu nhập tổng
+// nhập tổng
 else if(!isNaN(raw)){
-sum=parseInt(raw);
+    sum = parseInt(raw);
 }
 else{
-resultBox.innerHTML="Dữ liệu không hợp lệ";
-resultBox.className="result neutral";
-resultBox.style.display="block";
-return;
+    resultBox.innerHTML="Dữ liệu không hợp lệ";
+    resultBox.className="result neutral";
+    resultBox.style.display="block";
+    return;
 }
 
 let result="Không có rule cụ thể";
 let css="neutral";
 
-// ===== ƯU TIÊN CHECK BỘ ĐẶC BIỆT =====
-if(dicePattern){
-
-if(["124","223","133"].includes(dicePattern)){
-result="Mẫu đặc biệt → 89% XỈU";
-css="xiu";
-}
-else if(dicePattern==="134"){
-result="Mẫu đặc biệt → AUTO XỈU";
-css="xiu";
-}
-else if(["246","156","336","255"].includes(dicePattern)){
-result="Mẫu đặc biệt → AUTO XỈU";
-css="xiu";
-}
-else if(["553","661"].includes(dicePattern)){
-result="Mẫu đặc biệt → AUTO XỈU";
-css="xiu";
+// ===== NOTE 422 =====
+if(normalized==="224"){
+    noteBox.innerHTML += "⚠ Nếu phía trước là Xỉu 5 → AUTO XỈU<br>";
 }
 
+// ===== NOTE 221 =====
+if(normalized==="122"){
+    noteBox.innerHTML += "⚠ Nếu phía trước là 10 → AUTO TÀI<br>";
 }
 
-// ===== NẾU KHÔNG TRÙNG BỘ → ÁP DỤNG THEO TỔNG =====
+// ===== CÁC MẪU ĐẶC BIỆT =====
+if(normalized){
+
+if(["124","223","133"].includes(normalized)){
+    result="Mẫu đặc biệt tổng 7 → 89% XỈU";
+    css="xiu";
+}
+else if(normalized==="134"){
+    result="Mẫu đặc biệt tổng 8 → AUTO XỈU";
+    css="xiu";
+}
+else if(["246","156","336","255"].includes(normalized)){
+    result="Mẫu đặc biệt tổng 12 → AUTO XỈU";
+    css="xiu";
+}
+else if(["355","166"].includes(normalized)){
+    result="Mẫu đặc biệt tổng 13 nếu trước tài 17 Tài tiếp → AUTO XỈU";
+    css="xiu";
+}
+}
+
+// ===== THEO TỔNG =====
 if(css==="neutral"){
 
 switch(sum){
 
 case 3:
 case 5:
-result="Theo tổng → 100% XỈU";
-css="xiu";
-break;
+    result="Theo tổng → 100% XỈU";
+    css="xiu";
+    break;
 
 case 4:
-result="Theo tổng → 68% XỈU";
-css="xiu";
-break;
+    result="Theo tổng → 68% XỈU";
+    css="xiu";
+    break;
 
 case 6:
-result="Theo tổng → Nghỉ 1 tay";
-break;
+    result="Theo tổng → Nghỉ 1 tay";
+    break;
 
 case 7:
-result="Theo tổng → 89% XỈU";
-css="xiu";
-break;
+    result="Theo tổng → 89% XỈU";
+    css="xiu";
+    break;
 
 case 8:
-result="Theo tổng → Còn lại TÀI";
-css="tai";
-break;
+    result="Theo tổng 8 → Còn lại TÀI";
+    css="tai";
+    break;
 
 case 9:
-result="Theo tổng → 50/50";
-break;
+    result="Theo tổng → 50/50";
+    break;
 
 case 10:
-result="Theo tổng → AUTO XỈU";
-css="xiu";
-break;
+    result="Theo tổng → AUTO XỈU";
+    css="xiu";
+    break;
 
 case 11:
-result="Theo tổng → Nghỉ";
-break;
+    result="Theo tổng → Nghỉ";
+    break;
 
 case 12:
-result="Theo tổng → TÀI";
-css="tai";
-break;
+    result="Theo tổng → TÀI";
+    css="tai";
+    break;
 
 case 13:
-result="Theo tổng → TÀI";
-css="tai";
-break;
+    result="Theo tổng → TÀI";
+    css="tai";
+    break;
 
 case 14:
-result="Theo tổng → 50/50";
-break;
+    result="Theo tổng → 50/50";
+    break;
 
 case 15:
-result="Theo tổng → AUTO TÀI";
-css="tai";
-break;
+    result="Theo tổng → AUTO TÀI";
+    css="tai";
+    break;
 
 case 16:
-result="Theo tổng → XỈU";
-css="xiu";
-break;
+    result="Theo tổng → XỈU";
+    css="xiu";
+    break;
 
 case 17:
-result="Theo tổng → Có thể về 10";
-css="tai";
-break;
+    result="Theo tổng → Có thể về 10";
+    css="tai";
+    break;
 
 case 18:
-result="Theo tổng → TÀI";
-css="tai";
-break;
-
-default:
-result="Tổng ngoài phạm vi 3-18";
+    result="Theo tổng → TÀI";
+    css="tai";
+    break;
 }
 
 }
@@ -209,8 +244,9 @@ resultBox.innerHTML="Tổng: "+sum+"<br>"+result;
 resultBox.className="result "+css;
 resultBox.style.display="block";
 
-},1500);
+},1000);
 }
+
 </script>
 
 </body>
