@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VIP Time Slot Tracker</title>
+<title>VIP Time Tracker</title>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -68,10 +68,6 @@ td{
   background:linear-gradient(45deg,#ff4e50,#f00000);
 }
 
-tr:hover{
-  background:rgba(255,255,255,0.05);
-}
-
 .popup{
   position:fixed;
   top:50%;
@@ -97,14 +93,13 @@ tr:hover{
   td,th{font-size:14px;padding:10px;}
   .popup{font-size:18px;padding:25px;}
 }
-
 </style>
 </head>
 
 <body>
 
 <div class="container">
-<h1>🔥 VIP TIME SLOT TRACKER 🔥</h1>
+<h1>🔥 VIP TIME SLOT 🔥</h1>
 
 <div class="clock">
 ⏰ Giờ hiện tại: <span id="currentTime"></span>
@@ -127,9 +122,7 @@ tr:hover{
 
 const timeSlots=[
 {start:"00:00",end:"03:00"},
-{start:"10:00",end:"11:00"},
-{start:"11:00",end:"13:30"},
-{start:"20:00",end:"23:00"},
+{start:"21:30",end:"22:05"},
 {start:"22:40",end:"23:45"}
 ];
 
@@ -215,7 +208,7 @@ document.getElementById("tableBody").innerHTML=html;
 if(firstLoad){
 if(anyActive){
 showPopup("🔥 HIỆN ĐANG TRONG KHUNG GIỜ 🔥");
-document.body.style.background="linear-gradient(135deg,#003300,#006600)";
+document.body.style.background="linear-gradient(135deg,#003300,#009933)";
 }else{
 showPopup("⏳ KHUNG GẦN NHẤT SAU "+data[0].diff+" PHÚT");
 }
