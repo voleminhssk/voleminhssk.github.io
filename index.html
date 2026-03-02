@@ -3,25 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Auto Scan Pro</title>
+<title>AI Radar Until Midnight</title>
 
 <style>
 body{
   margin:0;
-  background:#040914;
+  background:#020617;
   font-family:Segoe UI;
   color:white;
   text-align:center;
 }
 
 .container{
-  max-width:900px;
+  max-width:1000px;
   margin:auto;
   padding:30px;
 }
 
 .card{
-  background:rgba(10,18,40,0.95);
+  background:rgba(10,20,45,0.95);
   padding:30px;
   border-radius:20px;
   box-shadow:0 0 40px #00f7ff33;
@@ -32,15 +32,19 @@ h1{
   text-shadow:0 0 15px #00f7ff;
 }
 
-select{
-  padding:12px;
-  margin:10px;
-  border-radius:12px;
-  border:none;
-  font-size:16px;
+.clock{
+  font-size:18px;
+  margin:10px 0;
+  color:#00ffcc;
 }
 
-/* RADAR */
+select{
+  padding:12px;
+  border-radius:12px;
+  border:none;
+  margin:15px 0;
+  font-size:16px;
+}
 
 .radar{
   width:280px;
@@ -56,7 +60,7 @@ select{
   position:absolute;
   width:100%;
   height:100%;
-  background:conic-gradient(#00f7ff99 0deg,transparent 70deg);
+  background:conic-gradient(#00f7ff88 0deg,transparent 70deg);
   animation:rotate 2s linear infinite;
 }
 
@@ -82,13 +86,8 @@ select{
 }
 
 .highlight{
-  font-size:24px;
+  font-size:22px;
   color:#00ff88;
-}
-
-.small{
-  font-size:13px;
-  opacity:0.8;
 }
 </style>
 </head>
@@ -98,9 +97,11 @@ select{
 <div class="container">
 <div class="card">
 
-<h1>🤖 AI AUTO RADAR SCAN</h1>
+<h1>🤖 AI REALTIME SCAN (ĐẾN 23:59)</h1>
 
-<select id="game">
+<div class="clock" id="clock"></div>
+
+<select id="game" onchange="generateWindow()">
 <option>Quyết Chiến</option>
 <option>Mạc Chược 1</option>
 <option>Mạc Chược 2</option>
@@ -121,8 +122,16 @@ select{
 
 let currentWindow=null;
 
+function formatTime(date){
+  return date.toLocaleTimeString();
+}
+
+function minutesOfDay(date){
+  return date.getHours()*60 + date.getMinutes();
+}
+
 function minutesToTime(min){
-  let h=Math.floor(min/60)%24;
+  let h=Math.floor(min/60);
   let m=min%60;
   return (h<10?"0"+h:h)+":"+(m<10?"0"+m:m);
 }
@@ -135,32 +144,44 @@ function seedFromString(str){
   return hash;
 }
 
-function generateNewWindow(){
-
-  let game=document.getElementById("game").value;
-  let userAgent=navigator.userAgent;
-  let seed=seedFromString(userAgent+game);
+function generateWindow(){
 
   let now=new Date();
-  let currentMin=now.getHours()*60+now.getMinutes();
+  let currentMin=minutesOfDay(now);
+  let endOfDay=23*60+59;
+
+  if(currentMin>=endOfDay){
+    currentWindow=null;
+    document.getElementById("output").innerHTML=
+      "⛔ ĐÃ KẾT THÚC NGÀY HÔM NAY";
+    return;
+  }
+
+  let game=document.getElementById("game").value;
+  let seed=seedFromString(game+navigator.userAgent+currentMin);
 
   let bestScore=0;
-  let bestStart=0;
-  let bestEnd=0;
+  let bestStart=currentMin;
+  let bestEnd=currentMin+5;
 
-  for(let i=0;i<50;i++){
+  // chỉ quét tới 23:59
+  for(let i=0;i<80;i++){
 
     let rand=Math.abs(Math.sin(seed+i))*10000;
     rand=rand-Math.floor(rand);
 
-    // quét 0 -> 12h tới
-    let start=currentMin+Math.floor(rand*720);
-    let duration=10+Math.floor(rand*40);
+    let maxRange=endOfDay-currentMin;
+    if(maxRange<=0) break;
+
+    let start=currentMin + Math.floor(rand*maxRange);
+    let duration=5 + Math.floor(rand*25);
     let end=start+duration;
+
+    if(end>endOfDay) end=endOfDay;
 
     let score=Math.floor(rand*100);
 
-    if(score>bestScore){
+    if(score>bestScore && start>=currentMin){
       bestScore=score;
       bestStart=start;
       bestEnd=end;
@@ -196,41 +217,44 @@ function placeTarget(){
   radar.appendChild(dot);
 }
 
-function updateDisplay(){
-
-  if(!currentWindow){
-    generateNewWindow();
-  }
+function update(){
 
   let now=new Date();
-  let currentMin=now.getHours()*60+now.getMinutes();
+  document.getElementById("clock").innerHTML=
+    "🕒 Thời gian hiện tại: "+formatTime(now);
 
-  if(currentMin>currentWindow.end){
-    generateNewWindow();
+  if(!currentWindow){
+    generateWindow();
   }
 
-  let minsToStart=currentWindow.start-currentMin;
-  let minsToEnd=currentWindow.end-currentMin;
+  if(currentWindow){
 
-  if(minsToStart<0) minsToStart=0;
-  if(minsToEnd<0) minsToEnd=0;
+    let currentMin=minutesOfDay(now);
 
-  document.getElementById("output").innerHTML=`
-    🔥 KHUNG GIỜ ĐƯỢC PHÁT HIỆN:<br><br>
-    <div class="highlight">
-    ${minutesToTime(currentWindow.start)} - ${minutesToTime(currentWindow.end)}
-    </div><br>
-    📊 Điểm AI: ${currentWindow.score}%<br><br>
-    ⏳ Bắt đầu sau: ${minsToStart} phút<br>
-    ⏳ Kết thúc sau: ${minsToEnd} phút<br>
-    <div class="small">
-    ⚠️ Khi khung kết thúc, AI sẽ tự động quét khung mới
-    </div>
-  `;
+    if(currentMin>=currentWindow.end){
+      generateWindow();
+    }
+
+    let minsToStart=currentWindow.start-currentMin;
+    let minsToEnd=currentWindow.end-currentMin;
+
+    if(minsToStart<0) minsToStart=0;
+    if(minsToEnd<0) minsToEnd=0;
+
+    document.getElementById("output").innerHTML=`
+      🔥 KHUNG GIỜ PHÁT HIỆN:<br><br>
+      <div class="highlight">
+      ${minutesToTime(currentWindow.start)} - ${minutesToTime(currentWindow.end)}
+      </div><br>
+      📊 Điểm AI: ${currentWindow.score}%<br><br>
+      ⏳ Còn ${minsToStart} phút tới bắt đầu<br>
+      ⏳ Còn ${minsToEnd} phút tới kết thúc
+    `;
+  }
 }
 
-generateNewWindow();
-setInterval(updateDisplay,10000);
+generateWindow();
+setInterval(update,1000);
 
 </script>
 
