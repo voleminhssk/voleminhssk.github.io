@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>AI Baccarat</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<style>
+
+body{
+    margin:0;
+    height:100vh;
+    font-family:'Orbitron',sans-serif;
+    background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:white;
+}
+
+.card{
+    width:480px;
+    padding:30px;
+    border-radius:20px;
+    background:rgba(255,255,255,0.05);
+    backdrop-filter:blur(15px);
+    box-shadow:0 0 50px rgba(0,255,255,0.3);
+    text-align:center;
+}
+
+h1{
+    color:#00ffff;
+    text-shadow:0 0 10px cyan;
+}
+
+input{
+    width:130px;
+    padding:12px;
+    margin:8px;
+    border-radius:10px;
+    border:none;
+    text-align:center;
+    background:#111;
+    color:#00ffff;
+    font-size:16px;
+}
+
+button{
+    padding:12px 25px;
+    border-radius:30px;
+    border:none;
+    margin-top:15px;
+    font-weight:bold;
+    background:linear-gradient(45deg,#00ffff,#00ff99);
+    cursor:pointer;
+}
+
+.progress{
+    width:100%;
+    height:12px;
+    background:#222;
+    border-radius:10px;
+    margin-top:20px;
+    overflow:hidden;
+}
+
+.progress-bar{
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,cyan,blue);
+}
+
+.percentText{
+    margin-top:8px;
+    font-size:12px;
+    color:cyan;
+}
+
+.result{
+    margin-top:25px;
+    font-size:14px;
+    text-align:left;
+}
+
+.row{
+    margin-bottom:15px;
+}
+
+.bar{
+    height:10px;
+    border-radius:10px;
+    margin-top:5px;
+}
+
+.banker{background:linear-gradient(90deg,#00ffff,#0066ff);}
+.player{background:linear-gradient(90deg,#ff0055,#ff6600);}
+.tie{background:linear-gradient(90deg,#00ff99,#00cc66);}
+
+.predict{
+    font-size:22px;
+    margin-top:20px;
+    text-align:center;
+    text-shadow:0 0 15px gold;
+}
+
+</style>
+</head>
+<body>
+
+<div class="card">
+<h1>AI BACCARAT</h1>
+
+<input type="number" id="playerScore" placeholder="Player (0-9)">
+<input type="number" id="bankerScore" placeholder="Banker (0-9)">
+<br>
+<button onclick="runAI()">CHẠY 100.000 SIM</button>
+
+<div class="progress">
+<div class="progress-bar" id="bar"></div>
+</div>
+<div class="percentText" id="percent">0%</div>
+
+<div class="result" id="result"></div>
+<div class="predict" id="predict"></div>
+
+</div>
+
+<script>
+
+function drawCard(){ return Math.floor(Math.random()*10); }
+
+function simulateOneRound(p,b){
+
+    if(p>=8||b>=8) return getWinner(p,b);
+
+    let playerThird=null;
+
+    if(p<=5){
+        playerThird=drawCard();
+        p=(p+playerThird)%10;
+    }
+
+    if(playerThird===null){
+        if(b<=5) b=(b+drawCard())%10;
+    } else {
+        if(
+            (b<=2) ||
+            (b==3 && playerThird!=8) ||
+            (b==4 && playerThird>=2 && playerThird<=7) ||
+            (b==5 && playerThird>=4 && playerThird<=7) ||
+            (b==6 && playerThird==6)
+        ){
+            b=(b+drawCard())%10;
+        }
+    }
+
+    return getWinner(p,b);
+}
+
+function getWinner(p,b){
+    if(p>b) return "PLAYER";
+    if(b>p) return "BANKER";
+    return "TIE";
+}
+
+function runAI(){
+
+    let p=parseInt(document.getElementById("playerScore").value);
+    let b=parseInt(document.getElementById("bankerScore").value);
+
+    if(isNaN(p)||isNaN(b)){
+        alert("Nhập điểm hợp lệ!");
+        return;
+    }
+
+    let total=100000;
+    let batch=2000;
+    let current=0;
+
+    let banker=0,player=0,tie=0;
+
+    function runBatch(){
+
+        for(let i=0;i<batch;i++){
+            let r=simulateOneRound(p,b);
+            if(r=="BANKER") banker++;
+            if(r=="PLAYER") player++;
+            if(r=="TIE") tie++;
+        }
+
+        current+=batch;
+
+        let percent=Math.floor((current/total)*100);
+        document.getElementById("bar").style.width=percent+"%";
+        document.getElementById("percent").innerHTML=
+            percent+"% - "+current.toLocaleString()+" / 100,000 trận";
+
+        if(current<total){
+            setTimeout(runBatch,0);
+        } else {
+
+            let bankerP=(banker/total*100);
+            let playerP=(player/total*100);
+            let tieP=(tie/total*100);
+
+            document.getElementById("result").innerHTML=`
+            <div class="row">
+            🔵 BANKER: ${banker.toLocaleString()} / 100,000 (${bankerP.toFixed(3)}%)
+            <div class="bar banker" style="width:${bankerP}%"></div>
+            </div>
+
+            <div class="row">
+            🔴 PLAYER: ${player.toLocaleString()} / 100,000 (${playerP.toFixed(3)}%)
+            <div class="bar player" style="width:${playerP}%"></div>
+            </div>
+
+            <div class="row">
+            🟢 TIE: ${tie.toLocaleString()} / 100,000 (${tieP.toFixed(3)}%)
+            <div class="bar tie" style="width:${tieP}%"></div>
+            </div>
+            `;
+
+            let prediction="";
+            if(bankerP>playerP && bankerP>tieP){
+                prediction="🔥 AI KHUYẾN NGHỊ: BANKER";
+            } else if(playerP>bankerP && playerP>tieP){
+                prediction="🔥 AI KHUYẾN NGHỊ: PLAYER";
+            } else {
+                prediction="⚖️ AI KHUYẾN NGHỊ: TIE";
+            }
+
+            document.getElementById("predict").innerHTML=prediction;
+            document.getElementById("percent").innerHTML="✔ Hoàn tất 100.000 mô phỏng";
+        }
+    }
+
+    runBatch();
+}
+
+</script>
+
+</body>
+</html>
