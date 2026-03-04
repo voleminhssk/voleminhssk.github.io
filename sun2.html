@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>🔥 TOOL SOI CẦU AI</title>
+<title>TOOL SOI CẦU AI</title>
 
 <style>
 *{box-sizing:border-box}
@@ -80,6 +80,21 @@ button:hover{
     animation:fadeIn 0.6s ease;
 }
 
+.loadingGif{
+    display:none;
+    width:120px;
+    margin:20px auto;
+}
+
+.popupGif{
+    display:none;
+    position:fixed;
+    top:20px;
+    right:20px;
+    width:90px;
+    z-index:999;
+}
+
 .tai{
     background:#2b0000;
     border:3px solid red;
@@ -136,16 +151,18 @@ button:hover{
 <br>
 <button onclick="analyze()">PHÂN TÍCH</button>
 
-<div class="loading" id="loadingText">🤖 AI đang phân tích dữ liệu...</div>
+<img id="loadingGif" class="loadingGif"
+src="https://cdn.dribbble.com/userupload/21951303/file/original-b7b602c5eb468d6b3c4b2e783edf8cf2.gif">
 
 <img id="robotGif"
-src="https://assets-v2.lottiefiles.com/a/b80c8f58-1166-11ee-bad3-8fb1e44c9ce0/Pzwmsjc4m2.gif">
+src="https://img.upanhnhanh.com/76f427417589158ffcafde68dd834293">
 
 <div id="resultBox" class="resultBox"></div>
 
 </div>
 
-<div class="popup" id="popup">🚀 Hệ thống AI bắt đầu phân tích...</div>
+<img id="popupGif" class="popupGif"
+src="https://i.pinimg.com/originals/92/99/40/929940c7800ad3868b0e7828d53073a7.gif">
 
 <script>
 
@@ -203,8 +220,8 @@ const data = [
 /* ====== HÀM PHÂN TÍCH ====== */
 function analyze(){
 
-    const popup=document.getElementById("popup");
-    const loading=document.getElementById("loadingText");
+    const popup=document.getElementById("popupGif");
+    const loading=document.getElementById("loadingGif");
     const resultBox=document.getElementById("resultBox");
 
     popup.style.display="block";
@@ -248,15 +265,15 @@ function analyze(){
 
         if(taiPercent>xiuPercent){
             resultBox.classList.add("tai");
-            resultBox.innerHTML="🔥 TÀI<br>"+taiPercent+"%";
+            resultBox.innerHTML="TÀI<br>"+taiPercent+"%";
         }
         else if(xiuPercent>taiPercent){
             resultBox.classList.add("xiu");
-            resultBox.innerHTML="❄ XỈU<br>"+xiuPercent+"%";
+            resultBox.innerHTML="XỈU<br>"+xiuPercent+"%";
         }
         else{
             resultBox.classList.add("equal");
-            resultBox.innerHTML="⚖ CÂN BẰNG<br>50% - 50%";
+            resultBox.innerHTML="CÂN BẰNG<br>50% - 50%";
         }
 
     },1500);
