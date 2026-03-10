@@ -17,73 +17,6 @@
 <title>👑 LE MINH VO PRO MAX - VIP SYSTEM</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=DM+Mono:wght@400;500;700&amp;family=Rajdhani:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
 <style>
-/* ==========================================================
-   CSS HỆ THỐNG QUẢN LÝ KEY & ĐĂNG NHẬP VIP (MỚI THÊM)
-   ========================================================== */
-@keyframes rotateGlow { 100% { transform: rotate(360deg); } }
-
-.gate-box {
-  position: relative; z-index: 1; width: 90%; max-width: 400px;
-  background: rgba(15, 15, 25, 0.8); backdrop-filter: blur(20px);
-  border: 1px solid rgba(0, 176, 255, 0.3); border-radius: 24px;
-  padding: 40px 25px; box-shadow: 0 0 50px rgba(0, 176, 255, 0.1);
-  text-align: center;
-}
-.gate-title {
-  font-family: 'Bebas Neue', sans-serif; font-size: 4rem; letter-spacing: 0.15em;
-  background: linear-gradient(135deg, #00b0ff, #aa00ff, #ff0055);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 15px rgba(0, 176, 255, 0.5)); margin-bottom: 10px;
-}
-.gate-sub { color: #94a3b8; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 30px; }
-.gate-input {
-  width: 100%; background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.1);
-  border-radius: 12px; padding: 18px; color: #00b0ff; font-family: 'DM Mono', monospace;
-  font-size: 1.1rem; text-align: center; outline: none; transition: all 0.3s; margin-bottom: 20px;
-  box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-}
-.gate-input:focus { border-color: #00b0ff; box-shadow: 0 0 20px rgba(0, 176, 255, 0.3), inset 0 0 10px rgba(0,0,0,0.5); }
-.gate-input::placeholder { color: #475569; }
-.gate-btn {
-  width: 100%; background: linear-gradient(90deg, #00b0ff, #7a00ff);
-  border: none; border-radius: 12px; padding: 16px; color: #fff;
-  font-family: 'Rajdhani', sans-serif; font-size: 1.1rem; font-weight: 800; letter-spacing: 0.1em;
-  cursor: pointer; transition: all 0.3s; text-transform: uppercase; box-shadow: 0 10px 20px rgba(122,0,255,0.3);
-}
-.gate-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0, 176, 255, 0.5); }
-
-/* CẢNH BÁO LỖI GATE */
-#gate-error { color: #ff0055; font-weight: 700; font-size: 0.9rem; margin-top: 15px; min-height: 20px; }
-</style>
-
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{
-  --bg:#f0f4f8;--s1:rgba(255, 255, 255, 0.85);--s2:#f8fafc;--s3:#e2e8f0;
-  --b1:rgba(255, 255, 255, 0.5);--b2:#cbd5e1;--b3:#94a3b8;
-  --gold:#f59e0b;--gold2:#f59e0b;--gold3:#d97706;--gold4:#fbbf24;
-  --red:#ef4444;--red2:#ff0055;--red3:#d50000;
-  --grn:#22c55e;--grn2:#00e676;--grn3:#00c853;
-  --blu:#3b82f6;--blu2:#00b0ff;--blu3:#2962ff;
-  --pur:#a855f7;--pur2:#d500f9;--pur3:#aa00ff;
-  --t1:#0f172a;--t2:#1e293b;--t3:#334155;
-  --dim:#64748b;--dim2:#64748b;
-}
-html,body{min-height:100%;background:var(--bg);color:var(--t1);font-family:'DM Mono',monospace;overflow-x:hidden}
-body{ background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); }
-body::before{
-  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
-  background: radial-gradient(circle at 10% 20%, rgba(255, 0, 122, 0.15) 0%, transparent 40%),
-              radial-gradient(circle at 90% 80%, rgba(0, 225, 255, 0.2) 0%, transparent 40%),
-              radial-gradient(circle at 50% 50%, rgba(255, 166, 0, 0.15) 0%, transparent 60%);
-  animation: pulseBg 12s infinite alternate ease-in-out;
-}
-@keyframes pulseBg { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(1.1); opacity: 1; } }
-
-.page{position:relative;z-index:1;display:none;min-height:100vh;flex-direction:column}
-.page.active{display:flex;animation:pf .4s cubic-bezier(0.16, 1, 0.3, 1)}
-@keyframes pf{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:none}}
-
 /* ════ APP ════ */
 .topbar{height:60px;background:rgba(255,255,255,0.7);backdrop-filter:blur(16px);
   border-bottom:1px solid rgba(255,255,255,0.5);display:flex;align-items:center;justify-content:space-between;
@@ -564,19 +497,6 @@ body::before{
 
 
     <script>
-
-    // PASS! VÀO APP CHÍNH
-  
-    document.getElementById('main-app-wrapper').style.display = 'block';
-    
-    // Tạo hàm hiển thị thông báo bên trong app nếu hàm showToast đã load
-    setTimeout(() => {
-        if(typeof showToast === 'function') {
-            showToast(`💎 KÍCH HOẠT THÀNH CÔNG! HẠN: ${new Date(k.expires).toLocaleString('vi-VN')}`);
-        }
-    }, 500);
-}
-</script>
 /* ═══════════════════════════════════════════════════════
    DEEP CORE V5 - ENSEMBLE + DEEP AI FILTER (NO RANDOM)
    - Kết hợp thuật toán Base (Tris Cũ)
