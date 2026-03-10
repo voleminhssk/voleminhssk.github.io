@@ -14,7 +14,7 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>👑 VI LONG PRO MAX - VIP SYSTEM</title>
+<title>👑 LE MINH VO PRO MAX - VIP SYSTEM</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=DM+Mono:wght@400;500;700&amp;family=Rajdhani:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
 <style>
 /* ==========================================================
@@ -344,7 +344,7 @@ body::before{
 <div id="main-app-wrapper" style="display:none; width:100%; min-height:100vh;">
   <div class="page active" id="pg-app">
     <div class="topbar">
-      <div class="tbl">👑 <small>VI LONG PRO MAX</small></div>
+      <div class="tbl">👑 <small>LE MINH VO PRO MAX</small></div>
       <div class="tbr">
         <span class="tb-u">VIP V5.7</span>
       </div>
@@ -564,59 +564,9 @@ body::before{
 
 
     <script>
-// Khởi tạo Device ID giả lập IP (lưu cứng vào trình duyệt)
-let deviceIP = localStorage.getItem('vl_device_ip');
-if(!deviceIP) {
-    deviceIP = 'IP-' + Math.random().toString(36).substr(2, 10).toUpperCase();
-    localStorage.setItem('vl_device_ip', deviceIP);
-}
-
-// Database Keys (File lớn)
-const DB_NAME = 'vilong_keys_database';
-let keyDB = JSON.parse(localStorage.getItem(DB_NAME)) || {};
-
-function saveDB() {
-    localStorage.setItem(DB_NAME, JSON.stringify(keyDB));
-}
-
-function checkKey() {
-    let keyInput = document.getElementById('key-input').value.trim();
-    let err = document.getElementById('gate-error');
-    err.textContent = '';
-
-    // Lối vào Admin
-    if(keyInput === 'toolanhlong') {
-        document.getElementById('vip-gate').style.display = 'none';
-        document.getElementById('admin-gate').style.display = 'flex';
-        renderAdminKeys();
-        return;
-    }
-
-    if(!keyInput) { err.textContent = '⚠ Vui lòng nhập Key!'; return; }
-    
-    // Kiểm tra tồn tại
-    if(!keyDB[keyInput]) { err.textContent = '⚠ Key không tồn tại trên hệ thống!'; return; }
-    
-    let k = keyDB[keyInput];
-
-    // Kiểm tra hạn sử dụng
-    if(Date.now() > k.expires) {
-        err.textContent = '⚠ Key của bạn đã hết hạn sử dụng!'; return;
-    }
-
-    // Kiểm tra dính IP (Khóa thiết bị)
-    if(k.ip && k.ip !== deviceIP) {
-        err.textContent = '⚠ Key này đã bị khóa cho 1 IP/Thiết bị khác!'; return;
-    }
-
-    // Nếu chưa có IP -> Gán IP cho Key này luôn (Không cho đứa khác xài)
-    if(!k.ip) {
-        k.ip = deviceIP;
-        saveDB();
-    }
 
     // PASS! VÀO APP CHÍNH
-    document.getElementById('vip-gate').style.display = 'none';
+  
     document.getElementById('main-app-wrapper').style.display = 'block';
     
     // Tạo hàm hiển thị thông báo bên trong app nếu hàm showToast đã load
@@ -626,86 +576,7 @@ function checkKey() {
         }
     }, 500);
 }
-
-// Bắt sự kiện Enter cho ô nhập Key
-document.getElementById('key-input').addEventListener('keypress', function(e) {
-    if(e.key === 'Enter') checkKey();
-});
-
-// --- CHỨC NĂNG DÀNH CHO ADMIN ---
-function closeAdmin() {
-    document.getElementById('admin-gate').style.display = 'none';
-    document.getElementById('vip-gate').style.display = 'flex';
-    document.getElementById('key-input').value = '';
-}
-
-function createKey() {
-    let prefix = "VL-" + Math.random().toString(36).substr(2, 6).toUpperCase();
-    let timeSelect = document.getElementById('key-time').value;
-    let ms = 0;
-    
-    if(timeSelect === '12h') ms = 12 * 3600 * 1000;
-    if(timeSelect === '1d') ms = 24 * 3600 * 1000;
-    if(timeSelect === '3d') ms = 3 * 24 * 3600 * 1000;
-    if(timeSelect === '7d') ms = 7 * 24 * 3600 * 1000;
-    if(timeSelect === '30d') ms = 30 * 24 * 3600 * 1000;
-
-    keyDB[prefix] = {
-        expires: Date.now() + ms,
-        ip: null, // Chưa gán
-        created: Date.now()
-    };
-    
-    saveDB();
-    renderAdminKeys();
-}
-
-function deleteKey(k) {
-    if(confirm("Chắc chắn xóa KEY này?")) {
-        delete keyDB[k];
-        saveDB();
-        renderAdminKeys();
-    }
-}
-
-function copyKey(k) {
-    navigator.clipboard.writeText(k).then(() => alert("Đã copy: " + k));
-}
-
-function renderAdminKeys() {
-    let tbody = document.getElementById('adm-tbody');
-    tbody.innerHTML = '';
-    
-    // Sort keys by created (newest first)
-    let keysArr = Object.keys(keyDB).sort((a,b) => keyDB[b].created - keyDB[a].created);
-
-    keysArr.forEach(k => {
-        let data = keyDB[k];
-        let tr = document.createElement('tr');
-        
-        // Thời gian
-        let expDate = new Date(data.expires);
-        let isExpired = Date.now() > data.expires;
-        let timeStr = expDate.toLocaleString('vi-VN');
-        let timeClass = isExpired ? 'k-exp' : 'k-act';
-        
-        // IP
-        let ipStr = data.ip ? data.ip : '<span style="color:#cbd5e1">Chưa gán</span>';
-        
-        tr.innerHTML = `
-            <td style="color:#fff; font-weight:bold;">${k}</td>
-            <td class="${timeClass}">${isExpired ? 'Hết hạn' : timeStr}</td>
-            <td>${ipStr}</td>
-            <td>
-                <button class="btn-copy" onclick="copyKey('${k}')">COPY</button>
-                <button class="btn-del" onclick="deleteKey('${k}')">XÓA</button>
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
 </script>
-<script>
 /* ═══════════════════════════════════════════════════════
    DEEP CORE V5 - ENSEMBLE + DEEP AI FILTER (NO RANDOM)
    - Kết hợp thuật toán Base (Tris Cũ)
