@@ -20,18 +20,6 @@
 /* ==========================================================
    CSS HỆ THỐNG QUẢN LÝ KEY & ĐĂNG NHẬP VIP (MỚI THÊM)
    ========================================================== */
-#vip-gate, #admin-gate {
-  position: fixed; inset: 0; z-index: 9999;
-  background: #05050a; overflow: hidden;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  font-family: 'Rajdhani', sans-serif;
-}
-#vip-gate::before {
-  content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-  background: radial-gradient(circle at 50% 50%, rgba(0, 176, 255, 0.1) 0%, transparent 40%),
-              radial-gradient(circle at 80% 20%, rgba(255, 0, 85, 0.15) 0%, transparent 30%);
-  animation: rotateGlow 20s linear infinite; z-index: 0;
-}
 @keyframes rotateGlow { 100% { transform: rotate(360deg); } }
 
 .gate-box {
@@ -63,23 +51,6 @@
   cursor: pointer; transition: all 0.3s; text-transform: uppercase; box-shadow: 0 10px 20px rgba(122,0,255,0.3);
 }
 .gate-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0, 176, 255, 0.5); }
-
-/* ADMIN PANEL */
-#admin-gate { display: none; background: #0b0c10; justify-content: flex-start; padding-top: 50px; overflow-y: auto;}
-.adm-box { width: 95%; max-width: 600px; background: #161822; border: 1px solid #2a2d3e; border-radius: 16px; padding: 20px; z-index: 1; }
-.adm-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #2a2d3e; padding-bottom: 15px;}
-.adm-head h2 { color: #00e676; font-size: 1.5rem; margin:0;}
-.btn-close-adm { background: #ff0055; color: white; border: none; padding: 5px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-.adm-controls { display: flex; gap: 10px; margin-bottom: 20px; }
-.adm-select { flex: 1; padding: 10px; background: #0b0c10; border: 1px solid #2a2d3e; color: #fff; border-radius: 8px; outline: none; }
-.adm-btn { background: #00b0ff; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-.adm-table { width: 100%; border-collapse: collapse; font-family: 'DM Mono', monospace; font-size: 0.75rem; color: #cbd5e1; }
-.adm-table th { text-align: left; padding: 10px; background: #2a2d3e; color: #fff; }
-.adm-table td { padding: 10px; border-bottom: 1px solid #2a2d3e; word-break: break-all; }
-.k-act { color: #00e676; font-weight: bold;}
-.k-exp { color: #ff0055; font-weight: bold;}
-.btn-del { background: transparent; border: 1px solid #ff0055; color: #ff0055; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem;}
-.btn-copy { background: transparent; border: 1px solid #00b0ff; color: #00b0ff; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; margin-right: 5px;}
 
 /* CẢNH BÁO LỖI GATE */
 #gate-error { color: #ff0055; font-weight: 700; font-size: 0.9rem; margin-top: 15px; min-height: 20px; }
@@ -370,53 +341,6 @@ body::before{
 
 @media(max-width:380px){.von-stats{grid-template-columns:1fr 1fr}.von-inputs{grid-template-columns:1fr}}
 </style>
-
-
-
-<div id="vip-gate">
-  <div class="gate-box">
-    <div class="gate-title">VI LONG</div>
-    <div class="gate-sub">HỆ THỐNG PHÂN TÍCH VIP</div>
-    <input type="text" id="key-input" class="gate-input" placeholder="Nhập mã KEY để kích hoạt..." autocomplete="off" spellcheck="false">
-    <button class="gate-btn" onclick="checkKey()">KÍCH HOẠT THIẾT BỊ</button>
-    <div id="gate-error"></div>
-  </div>
-</div>
-
-<div id="admin-gate">
-  <div class="adm-box">
-    <div class="adm-head">
-      <h2>👑 ADMIN PANEL</h2>
-      <button class="btn-close-adm" onclick="closeAdmin()">X ĐÓNG</button>
-    </div>
-    
-    <div class="adm-controls">
-      <select id="key-time" class="adm-select">
-        <option value="12h">12 Giờ</option>
-        <option value="1d">1 Ngày</option>
-        <option value="3d">3 Ngày</option>
-        <option value="7d">1 Tuần</option>
-        <option value="30d">1 Tháng</option>
-      </select>
-      <button class="adm-btn" onclick="createKey()">+ TẠO KEY MỚI</button>
-    </div>
-
-    <div style="overflow-x:auto;">
-      <table class="adm-table" id="adm-table">
-        <thead>
-          <tr>
-            <th>KEY</th>
-            <th>HẾT HẠN</th>
-            <th>IP/DEVICE</th>
-            <th>HÀNH ĐỘNG</th>
-          </tr>
-        </thead>
-        <tbody id="adm-tbody"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
 <div id="main-app-wrapper" style="display:none; width:100%; min-height:100vh;">
   <div class="page active" id="pg-app">
     <div class="topbar">
