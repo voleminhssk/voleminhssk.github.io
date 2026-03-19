@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>BOT PHÂN TÍCH KHUNG GIỜ THEO NGÀY</title>
+<title>BOT PHÂN TÍCH KHUNG GIỜ CHUẨN</title>
 
 <style>
 body {
@@ -36,7 +36,7 @@ button {
     background: #1e293b;
     margin: 15px auto;
     padding: 15px;
-    width: 300px;
+    width: 320px;
     border-radius: 10px;
 }
 </style>
@@ -45,7 +45,7 @@ button {
 <body>
 
 <div class="container">
-    <h1>🤖 BOT PHÂN TÍCH KHUNG GIỜ THEO NGÀY</h1>
+    <h1>🤖 BOT PHÂN TÍCH KHUNG GIỜ (PRO)</h1>
 
     <input type="number" id="nap" placeholder="Tổng tiền nạp">
     <input type="number" id="cuoc" placeholder="Tổng tiền cược">
@@ -56,20 +56,23 @@ button {
 </div>
 
 <script>
-function getBestHour(ratio, isWeekend) {
-    let bestHour = "";
-    let bestScore = -999;
+
+// 🔥 CORE: lấy TOP giờ (không bị trùng)
+function getBestHours(ratio, isWeekend) {
+    let hours = [];
 
     for (let i = 0; i < 24; i++) {
         let score = 0;
 
-        // 🔥 giờ đêm (xả mạnh)
+        // 🧠 pattern hệ thống
+
+        // giờ đêm (xả)
         if (i >= 1 && i <= 5) score += isWeekend ? 2 : 3;
 
-        // 🔥 giờ chuyển
+        // giờ chuyển
         if ((i >= 9 && i <= 11) || (i >= 14 && i <= 16)) score += 2;
 
-        // 🔥 giờ tối (hút)
+        // giờ cao điểm (hút)
         if (i >= 19 && i <= 23) score -= isWeekend ? 4 : 3;
 
         // 🔥 ratio
@@ -77,15 +80,22 @@ function getBestHour(ratio, isWeekend) {
         if (ratio > 2) score += 1;
         if (ratio < 1) score -= 2;
 
-        if (score > bestScore) {
-            bestScore = score;
-            bestHour = i + "h";
-        }
+        // ✅ chống trùng (rất quan trọng)
+        score += i * 0.01;
+
+        hours.push({
+            hour: i + "h",
+            score: score
+        });
     }
 
-    return {hour: bestHour, score: bestScore};
+    // 🔥 sort theo điểm
+    hours.sort((a,b)=>b.score-a.score);
+
+    return hours.slice(0,3); // TOP 3 giờ
 }
 
+// 🚀 MAIN
 function analyze() {
     let nap = parseFloat(document.getElementById("nap").value);
     let cuoc = parseFloat(document.getElementById("cuoc").value);
@@ -105,21 +115,23 @@ function analyze() {
     let html = "";
 
     days.forEach((day, index) => {
+
         let isWeekend = (index >= 4); // T6-CN
 
-        let result = getBestHour(ratio, isWeekend);
+        let bestHours = getBestHours(ratio, isWeekend);
 
         html += `
         <div class="day-box">
             <h3>${day}</h3>
-            🔥 Giờ đẹp: ${result.hour} <br>
-            ⚡ Điểm: ${result.score}
+            🔥 Giờ đẹp: ${bestHours.map(h => h.hour).join(" - ")} <br>
+            ⚡ Điểm: ${bestHours.map(h => h.score.toFixed(2)).join(" | ")}
         </div>
         `;
     });
 
     document.getElementById("result").innerHTML = html;
 }
+
 </script>
 
 </body>
