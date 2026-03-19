@@ -2,93 +2,42 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Radar</title>
+<title>BOT PHÂN TÍCH KHUNG GIỜ THEO NGÀY</title>
 
 <style>
-body{
-  margin:0;
-  background:#020617;
-  font-family:Segoe UI;
-  color:white;
-  text-align:center;
+body {
+    background: #0f172a;
+    color: white;
+    font-family: Arial;
+    text-align: center;
 }
 
-.container{
-  max-width:1000px;
-  margin:auto;
-  padding:30px;
+.container {
+    margin-top: 40px;
 }
 
-.card{
-  background:rgba(10,20,45,0.95);
-  padding:30px;
-  border-radius:20px;
-  box-shadow:0 0 40px #00f7ff33;
+input {
+    padding: 10px;
+    margin: 10px;
+    width: 220px;
+    background: #1e293b;
+    border: none;
+    color: white;
 }
 
-h1{
-  color:#00f7ff;
-  text-shadow:0 0 15px #00f7ff;
+button {
+    padding: 12px 25px;
+    background: orange;
+    border: none;
+    cursor: pointer;
 }
 
-.clock{
-  font-size:18px;
-  margin:10px 0;
-  color:#00ffcc;
-}
-
-select{
-  padding:12px;
-  border-radius:12px;
-  border:none;
-  margin:15px 0;
-  font-size:16px;
-  cursor:pointer;
-}
-
-.radar{
-  width:280px;
-  height:280px;
-  margin:30px auto;
-  border-radius:50%;
-  border:2px solid #00f7ff44;
-  position:relative;
-  overflow:hidden;
-}
-
-.scan{
-  position:absolute;
-  width:100%;
-  height:100%;
-  background:conic-gradient(#00f7ff88 0deg,transparent 70deg);
-  animation:rotate 2s linear infinite;
-}
-
-@keyframes rotate{
-  from{transform:rotate(0deg);}
-  to{transform:rotate(360deg);}
-}
-
-.target{
-  position:absolute;
-  width:12px;
-  height:12px;
-  background:#00ff88;
-  border-radius:50%;
-  box-shadow:0 0 15px #00ff88;
-  animation:pulse 1s infinite;
-}
-
-@keyframes pulse{
-  0%{transform:scale(1);}
-  50%{transform:scale(1.6);}
-  100%{transform:scale(1);}
-}
-
-.highlight{
-  font-size:22px;
-  color:#00ff88;
+.day-box {
+    background: #1e293b;
+    margin: 15px auto;
+    padding: 15px;
+    width: 300px;
+    border-radius: 10px;
 }
 </style>
 </head>
@@ -96,175 +45,81 @@ select{
 <body>
 
 <div class="container">
-<div class="card">
+    <h1>🤖 BOT PHÂN TÍCH KHUNG GIỜ THEO NGÀY</h1>
 
-<h1>🤖 AI SCAN</h1>
+    <input type="number" id="nap" placeholder="Tổng tiền nạp">
+    <input type="number" id="cuoc" placeholder="Tổng tiền cược">
+    <br>
+    <button onclick="analyze()">🚀 Phân tích</button>
 
-<div class="clock" id="clock"></div>
-
-<select id="game">
-<option>Quyết Chiến</option>
-<option>Mạc Chược 1</option>
-<option>Mạc Chược 2</option>
-<option>Aztec</option>
-<option>Wild Đạo Tặc</option>
-</select>
-
-<div class="radar" id="radar">
-<div class="scan"></div>
-</div>
-
-<div id="output"></div>
-
-</div>
+    <div id="result"></div>
 </div>
 
 <script>
+function getBestHour(ratio, isWeekend) {
+    let bestHour = "";
+    let bestScore = -999;
 
-let currentWindow=null;
-let lastGame="";
+    for (let i = 0; i < 24; i++) {
+        let score = 0;
 
-function formatTime(date){
-  return date.toLocaleTimeString();
-}
+        // 🔥 giờ đêm (xả mạnh)
+        if (i >= 1 && i <= 5) score += isWeekend ? 2 : 3;
 
-function minutesOfDay(date){
-  return date.getHours()*60 + date.getMinutes();
-}
+        // 🔥 giờ chuyển
+        if ((i >= 9 && i <= 11) || (i >= 14 && i <= 16)) score += 2;
 
-function minutesToTime(min){
-  let h=Math.floor(min/60);
-  let m=min%60;
-  return (h<10?"0"+h:h)+":"+(m<10?"0"+m:m);
-}
+        // 🔥 giờ tối (hút)
+        if (i >= 19 && i <= 23) score -= isWeekend ? 4 : 3;
 
-function seedFromString(str){
-  let hash=0;
-  for(let i=0;i<str.length;i++){
-    hash=str.charCodeAt(i)+((hash<<5)-hash);
-  }
-  return hash;
-}
+        // 🔥 ratio
+        if (ratio > 1.5) score += 2;
+        if (ratio > 2) score += 1;
+        if (ratio < 1) score -= 2;
 
-function generateWindow(){
-
-  let now=new Date();
-  let currentMin=minutesOfDay(now);
-  let endOfDay=23*60+59;
-
-  // Không tạo khung nếu còn dưới 40 phút tới 00:00
-  if(endOfDay-currentMin < 40){
-    currentWindow=null;
-    document.getElementById("output").innerHTML=
-      "⛔ Không tạo khung mới vì quá sát ngày mới";
-    return;
-  }
-
-  let game=document.getElementById("game").value;
-  let seed=seedFromString(game+navigator.userAgent+currentMin);
-
-  let bestScore=0;
-  let bestStart=currentMin;
-  let bestEnd=currentMin+30;
-
-  for(let i=0;i<80;i++){
-
-    let rand=Math.abs(Math.sin(seed+i))*10000;
-    rand=rand-Math.floor(rand);
-
-    let maxRange=(endOfDay-currentMin-40);
-    if(maxRange<=0) break;
-
-    let start=currentMin + Math.floor(rand*maxRange);
-
-    // Khoảng cách khung 30–40 phút
-    let duration=30 + Math.floor(rand*10); // 30-40p
-    let end=start+duration;
-
-    if(end>endOfDay-5) continue;
-
-    let score=Math.floor(rand*100);
-
-    if(score>bestScore){
-      bestScore=score;
-      bestStart=start;
-      bestEnd=end;
-    }
-  }
-
-  currentWindow={
-    start:bestStart,
-    end:bestEnd,
-    score:bestScore
-  };
-
-  placeTarget();
-}
-
-function placeTarget(){
-  let radar=document.getElementById("radar");
-  let old=document.querySelector(".target");
-  if(old) old.remove();
-
-  let dot=document.createElement("div");
-  dot.className="target";
-
-  let angle=Math.random()*360;
-  let radius=90*Math.random();
-
-  let x=140 + radius*Math.cos(angle*Math.PI/180);
-  let y=140 + radius*Math.sin(angle*Math.PI/180);
-
-  dot.style.left=x+"px";
-  dot.style.top=y+"px";
-
-  radar.appendChild(dot);
-}
-
-function update(){
-
-  let now=new Date();
-  document.getElementById("clock").innerHTML=
-    "🕒 Thời gian hiện tại: "+formatTime(now);
-
-  let selectedGame=document.getElementById("game").value;
-
-  if(selectedGame !== lastGame){
-    lastGame = selectedGame;
-    generateWindow();
-  }
-
-  if(currentWindow){
-
-    let currentMin=minutesOfDay(now);
-
-    if(currentMin>=currentWindow.end){
-      generateWindow();
+        if (score > bestScore) {
+            bestScore = score;
+            bestHour = i + "h";
+        }
     }
 
-    let minsToStart=currentWindow.start-currentMin;
-    let minsToEnd=currentWindow.end-currentMin;
-
-    if(minsToStart<0) minsToStart=0;
-    if(minsToEnd<0) minsToEnd=0;
-
-    document.getElementById("output").innerHTML=`
-      🎮 Game: ${selectedGame}<br><br>
-      🔥 KHUNG GIỜ 30–40 PHÚT:<br><br>
-      <div class="highlight">
-      ${minutesToTime(currentWindow.start)} - ${minutesToTime(currentWindow.end)}
-      </div><br>
-      📊 Điểm AI: ${currentWindow.score}%<br><br>
-      ⏳ Còn ${minsToStart} phút tới bắt đầu<br>
-      ⏳ Còn ${minsToEnd} phút tới kết thúc
-    `;
-  }
+    return {hour: bestHour, score: bestScore};
 }
 
-lastGame=document.getElementById("game").value;
-generateWindow();
-setInterval(update,1000);
+function analyze() {
+    let nap = parseFloat(document.getElementById("nap").value);
+    let cuoc = parseFloat(document.getElementById("cuoc").value);
 
+    if (!nap || !cuoc) {
+        alert("Nhập đủ dữ liệu!");
+        return;
+    }
+
+    let ratio = cuoc / nap;
+
+    let days = [
+        "Thứ 2","Thứ 3","Thứ 4","Thứ 5",
+        "Thứ 6","Thứ 7","Chủ nhật"
+    ];
+
+    let html = "";
+
+    days.forEach((day, index) => {
+        let isWeekend = (index >= 4); // T6-CN
+
+        let result = getBestHour(ratio, isWeekend);
+
+        html += `
+        <div class="day-box">
+            <h3>${day}</h3>
+            🔥 Giờ đẹp: ${result.hour} <br>
+            ⚡ Điểm: ${result.score}
+        </div>
+        `;
+    });
+
+    document.getElementById("result").innerHTML = html;
+}
 </script>
 
 </body>
