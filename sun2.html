@@ -9,133 +9,69 @@
 
 body{
     margin:0;
-    font-family:Arial, sans-serif;
+    font-family:Arial;
     background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-    min-height:100vh;
     display:flex;
     justify-content:center;
     align-items:center;
+    min-height:100vh;
     color:white;
 }
 
-/* KHUNG CHÍNH */
 .container{
     width:90%;
     max-width:600px;
-    padding:40px;
-    border-radius:25px;
+    padding:30px;
+    border-radius:20px;
     background:rgba(255,255,255,0.05);
     backdrop-filter:blur(15px);
-    box-shadow:0 0 40px rgba(0,255,255,0.2);
     text-align:center;
 }
 
 h1{
     color:gold;
-    margin-bottom:25px;
 }
 
-/* INPUT */
 input{
     width:80%;
-    padding:14px;
-    border-radius:12px;
+    padding:12px;
+    border-radius:10px;
     border:none;
-    font-size:16px;
-    margin-bottom:20px;
     text-align:center;
+    margin-bottom:15px;
 }
 
-/* BUTTON */
 button{
-    padding:14px 35px;
-    border-radius:12px;
+    padding:12px 30px;
     border:none;
-    font-weight:bold;
+    border-radius:10px;
     cursor:pointer;
-    font-size:16px;
     background:linear-gradient(45deg,#00f2ff,#00c3ff);
-    transition:0.3s;
 }
 
-button:hover{
-    transform:scale(1.05);
-}
-
-/* ROBOT */
-#robotGif{
-    width:160px;
-    margin:20px auto;
-    display:block;
-}
-
-/* RESULT BOX */
 .resultBox{
-    display:none;
-    margin-top:30px;
-    padding:25px;
-    border-radius:20px;
-    font-size:28px;
-    font-weight:bold;
-    animation:fadeIn 0.6s ease;
+    margin-top:20px;
+    padding:15px;
+    border-radius:15px;
+    font-size:22px;
 }
+
+.historyItem{
+    margin:10px 0;
+    padding:10px;
+    border-radius:10px;
+    background:rgba(0,0,0,0.4);
+    font-size:18px;
+}
+
+.left{color:#00aaff}
+.match{color:yellow}
+.right{color:red}
 
 .loadingGif{
+    width:100px;
     display:none;
-    width:120px;
-    margin:20px auto;
-}
-
-.popupGif{
-    display:none;
-    position:fixed;
-    top:20px;
-    right:20px;
-    width:90px;
-    z-index:999;
-}
-
-.tai{
-    background:#2b0000;
-    border:3px solid red;
-    box-shadow:0 0 30px red;
-}
-
-.xiu{
-    background:#001a2b;
-    border:3px solid #00aaff;
-    box-shadow:0 0 30px #00aaff;
-}
-
-.equal{
-    background:#333;
-    border:3px solid gold;
-    box-shadow:0 0 30px gold;
-}
-
-/* LOADING */
-.loading{
-    margin-top:20px;
-    display:none;
-    font-size:18px;
-    color:#00f2ff;
-}
-
-/* POPUP */
-.popup{
-    position:fixed;
-    top:20px;
-    right:20px;
-    background:#111;
-    padding:15px 25px;
-    border-radius:12px;
-    box-shadow:0 0 20px cyan;
-    display:none;
-}
-
-@keyframes fadeIn{
-    from{opacity:0;transform:translateY(20px);}
-    to{opacity:1;transform:translateY(0);}
+    margin:10px auto;
 }
 </style>
 </head>
@@ -144,7 +80,9 @@ button:hover{
 
 <div class="container">
 
-<input type="text" id="searchInput" placeholder="Nhập chuỗi ví dụ: 6,8,7">
+<h1>TOOL SOI CẦU AI</h1>
+
+<input type="text" id="searchInput" placeholder="VD: 6,8,7">
 
 <br>
 <button onclick="analyze()">PHÂN TÍCH</button>
@@ -152,18 +90,14 @@ button:hover{
 <img id="loadingGif" class="loadingGif"
 src="https://usagif.com/wp-content/uploads/loading-73.gif">
 
-<img id="robotGif"
-src="https://img.upanhnhanh.com/76f427417589158ffcafde68dd834293">
-
 <div id="resultBox" class="resultBox"></div>
+<div id="historyBox"></div>
 
 </div>
 
-<img id="popupGif" class="popupGif"
-src="https://media2.giphy.com/media/v1.Y2lkPTZjMDliOTUyMWlrcGYweGpsNjd6Y3JsNWcxYnkxZXM4cW5sZWY0anJxc2l0cTY2cyZlcD12MV9zdGlja2Vyc19zZWFyY2gmY3Q9cw/faWsfcwkzbfZQ3HOac/source.gif">
-
 <script>
 
+/* ===== DATA (GIỮ NGUYÊN CỦA BẠN) ===== */
 const data = [
 [13,8,11,14,14,9,9,11,11,8,12,10,9,15,13,12,9,10,9,13,13,12,15,8,11,13,12,13,11,11],
 [12,11,5,5,10,17,9,10,7,9,9,10,9,12,8,12,7,11,11,9,10,11,9,14,11,9,11,4,11,13],
@@ -323,67 +257,80 @@ const data = [
 [11,12,10,14,12,7,6,8,11,8,13,12,9,14,11,15,13,9,12,9,8,14,8,6,14,8,8,6,5,11,5,11,11,7,12,15,8,11,11,9,13,10]
 ];
 
-
-/* ====== HÀM PHÂN TÍCH ====== */
+/* ===== FUNCTION ===== */
 function analyze(){
 
-    const popup=document.getElementById("popupGif");
     const loading=document.getElementById("loadingGif");
     const resultBox=document.getElementById("resultBox");
+    const historyBox=document.getElementById("historyBox");
 
-    popup.style.display="block";
     loading.style.display="block";
-    resultBox.style.display="none";
-    resultBox.className="resultBox";
+    resultBox.innerHTML="";
+    historyBox.innerHTML="";
 
     setTimeout(()=>{
-        popup.style.display="none";
 
         let search=document.getElementById("searchInput").value
         .split(',')
         .map(x=>parseInt(x.trim()));
 
-        let nextNumbers=[];
+        let matches=[];
 
-        data.forEach(row=>{
+        data.forEach((row,rowIndex)=>{
+
             for(let i=0;i<=row.length-search.length;i++){
+
                 let match=true;
+
                 for(let j=0;j<search.length;j++){
                     if(row[i+j]!==search[j]){
                         match=false;
                         break;
                     }
                 }
-                if(match && i+search.length<row.length){
-                    nextNumbers.push(row[i+search.length]);
+
+                if(match){
+
+                    let left=row.slice(Math.max(0,i-2),i);
+                    let right=row.slice(i+search.length,i+search.length+2);
+
+                    matches.push({
+                        left,left,
+                        match:search,
+                        right:right,
+                        index:rowIndex
+                    });
                 }
             }
         });
 
-        let tai=nextNumbers.filter(n=>n>=11).length;
-        let xiu=nextNumbers.filter(n=>n<=10).length;
-        let total=nextNumbers.length;
-
-        let taiPercent=total?((tai/total)*100).toFixed(2):0;
-        let xiuPercent=total?((xiu/total)*100).toFixed(2):0;
+        // lấy 5 chuỗi mới nhất
+        matches = matches.reverse().slice(0,5);
 
         loading.style.display="none";
-        resultBox.style.display="block";
 
-        if(taiPercent>xiuPercent){
-            resultBox.classList.add("tai");
-            resultBox.innerHTML="TÀI<br>"+taiPercent+"%";
-        }
-        else if(xiuPercent>taiPercent){
-            resultBox.classList.add("xiu");
-            resultBox.innerHTML="XỈU<br>"+xiuPercent+"%";
-        }
-        else{
-            resultBox.classList.add("equal");
-            resultBox.innerHTML="CÂN BẰNG<br>50% - 50%";
+        if(matches.length===0){
+            resultBox.innerHTML="❌ Không tìm thấy";
+            return;
         }
 
-    },1500);
+        resultBox.innerHTML="✅ Tìm thấy "+matches.length+" chuỗi gần nhất";
+
+        let html="";
+
+        matches.forEach(m=>{
+            html+=`
+            <div class="historyItem">
+                <span class="left">[${m.left.join(",")}]</span>
+                <span class="match"> | ${m.match.join(",")} | </span>
+                <span class="right">[${m.right.join(",")}]</span>
+            </div>
+            `;
+        });
+
+        historyBox.innerHTML=html;
+
+    },800);
 }
 
 </script>
