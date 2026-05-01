@@ -1,25 +1,56 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>🔥 Baccarat Probability Engine</title>
+<title>🔥 Baccarat AI PRO MAX</title>
+
 <style>
-body{background:#0b0f1a;color:#fff;font-family:Arial;text-align:center;padding:20px}
-.box{max-width:420px;margin:auto;background:#111827;padding:20px;border-radius:12px}
-input{width:100%;padding:10px;margin:8px 0;border:none;border-radius:6px;text-align:center}
-button{width:100%;padding:12px;background:#00ffc3;border:none;border-radius:6px;font-weight:bold}
-.result{margin-top:20px;font-size:18px}
+body{
+    background:#0b0f1a;
+    color:#fff;
+    font-family:Arial;
+    text-align:center;
+    padding:20px;
+}
+.box{
+    max-width:460px;
+    margin:auto;
+    background:#111827;
+    padding:20px;
+    border-radius:12px;
+}
+input{
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    border:none;
+    border-radius:6px;
+    text-align:center;
+}
+button{
+    width:100%;
+    padding:12px;
+    background:#00ffc3;
+    border:none;
+    border-radius:6px;
+    font-weight:bold;
+}
+.result{
+    margin-top:20px;
+    font-size:18px;
+}
 </style>
 </head>
 
 <body>
 
 <div class="box">
-<h2>🔥 Baccarat Probability Engine</h2>
+<h2>🔥 Baccarat AI PRO MAX</h2>
 
 <input id="bTotal" type="number" placeholder="Tổng cái (Banker)">
 <input id="pTotal" type="number" placeholder="Tổng con (Player)">
-<input id="history" placeholder="5 phiên VD: B,P,B,B,P">
+<input id="tTotal" type="number" placeholder="Tổng hòa (Tie)">
+<input id="history" placeholder="8 phiên VD: B,P,T,B,B,P,T,P">
 
 <button onclick="calc()">Tính xác suất</button>
 
@@ -31,60 +62,75 @@ function calc(){
 
 let bTotal = parseFloat(document.getElementById("bTotal").value)||0;
 let pTotal = parseFloat(document.getElementById("pTotal").value)||0;
+let tTotal = parseFloat(document.getElementById("tTotal").value)||0;
+
 let h = document.getElementById("history").value.toUpperCase().split(",");
 
-if(h.length<5){alert("Nhập đủ 5 phiên");return;}
+if(h.length < 8){
+    alert("Nhập ít nhất 8 phiên!");
+    return;
+}
 
-// 🔢 base
+// base
 let baseB = 0.4586;
 let baseP = 0.4462;
+let baseT = 0.0952;
 
-// 🔵 LONG
-let sum = bTotal + pTotal;
-let longB = sum>0 ? bTotal/sum : 0.5;
-let longP = sum>0 ? pTotal/sum : 0.5;
+// LONG
+let sum = bTotal + pTotal + tTotal;
+let longB = sum>0 ? bTotal/sum : 0.33;
+let longP = sum>0 ? pTotal/sum : 0.33;
+let longT = sum>0 ? tTotal/sum : 0.34;
 
-// 🔴 SHORT
-let w = [1,2,3,5,8];
-let sb=0, sp=0;
+// SHORT
+let w = [1,1,2,3,5,8,13,21];
+let sb=0, sp=0, st=0;
 
-for(let i=0;i<5;i++){
-if(h[i].trim()=="B") sb+=w[i];
-if(h[i].trim()=="P") sp+=w[i];
+for(let i=0;i<8;i++){
+let x = h[i].trim();
+if(x=="B") sb+=w[i];
+if(x=="P") sp+=w[i];
+if(x=="T") st+=w[i];
 }
 
-let totalShort = sb+sp;
+let totalShort = sb+sp+st;
 let shortB = sb/totalShort;
 let shortP = sp/totalShort;
+let shortT = st/totalShort;
 
-// ⚡ pattern
-if(h[4]==h[3]){
-if(h[4]=="B") shortB+=0.02;
-else shortP+=0.02;
+// PATTERN
+if(h[7]==h[6]){
+    if(h[7]=="B") shortB+=0.02;
+    if(h[7]=="P") shortP+=0.02;
+    if(h[7]=="T") shortT+=0.02;
 }else{
-if(h[4]=="B") shortP+=0.015;
-else shortB+=0.015;
+    if(h[7]=="B") shortP+=0.015;
+    else shortB+=0.015;
 }
 
-let str = h.join("");
-if(str.includes("BBB")) shortB+=0.03;
-if(str.includes("PPP")) shortP+=0.03;
+// tie gần nhất
+if(h[7]=="T") shortT+=0.03;
 
-// 🎯 FINAL
-let finalB = (0.5*shortB)+(0.3*longB)+(0.2*baseB);
-let finalP = (0.5*shortP)+(0.3*longP)+(0.2*baseP);
+// FINAL
+let finalB = 0.5*shortB + 0.3*longB + 0.2*baseB;
+let finalP = 0.5*shortP + 0.3*longP + 0.2*baseP;
+let finalT = 0.5*shortT + 0.3*longT + 0.2*baseT;
 
-let total = finalB + finalP;
+let total = finalB + finalP + finalT;
 
 let bPercent = ((finalB/total)*100).toFixed(2);
 let pPercent = ((finalP/total)*100).toFixed(2);
+let tPercent = ((finalT/total)*100).toFixed(2);
 
-let res = finalB > finalP ? "🔴 BANKER" : "🔵 PLAYER";
+let result = "🔴 BANKER";
+if(finalP > finalB && finalP > finalT) result = "🔵 PLAYER";
+if(finalT > finalB && finalT > finalP) result = "🟡 TIE";
 
 document.getElementById("result").innerHTML =
 `Banker: ${bPercent}%<br>
- Player: ${pPercent}%<br><br>
- 👉 ${res}`;
+ Player: ${pPercent}%<br>
+ Tie: ${tPercent}%<br><br>
+ 👉 ${result}`;
 }
 </script>
 
