@@ -1,166 +1,90 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Baccarat AI PRO MAX</title>
+<title>🔥 Baccarat Probability Engine</title>
 <style>
-body{background:#020617;color:#fff;text-align:center;font-family:Arial}
-input{
-    width:85%;
-    padding:12px;
-    font-size:18px;
-    text-transform:uppercase;
-}
-button{
-    padding:10px 20px;
-    margin-top:10px;
-    background:#22c55e;
-    border:none;
-}
-#out{margin-top:20px;font-size:18px}
+body{background:#0b0f1a;color:#fff;font-family:Arial;text-align:center;padding:20px}
+.box{max-width:420px;margin:auto;background:#111827;padding:20px;border-radius:12px}
+input{width:100%;padding:10px;margin:8px 0;border:none;border-radius:6px;text-align:center}
+button{width:100%;padding:12px;background:#00ffc3;border:none;border-radius:6px;font-weight:bold}
+.result{margin-top:20px;font-size:18px}
 </style>
 </head>
+
 <body>
 
-<h2>🔥 Baccarat AI PRO MAX (10 → 20 ván)</h2>
+<div class="box">
+<h2>🔥 Baccarat Probability Engine</h2>
 
-<input id="data" placeholder="VD: BBPPBPBPPBBPPBP..." maxlength="20"/>
-<br>
-<button onclick="AI()">Phân tích</button>
+<input id="bTotal" type="number" placeholder="Tổng cái (Banker)">
+<input id="pTotal" type="number" placeholder="Tổng con (Player)">
+<input id="history" placeholder="5 phiên VD: B,P,B,B,P">
 
-<div id="out"></div>
+<button onclick="calc()">Tính xác suất</button>
+
+<div id="result" class="result"></div>
+</div>
 
 <script>
-let memory = JSON.parse(localStorage.getItem("bcr_ai_20") || "[]");
+function calc(){
 
-function AI(){
-    let raw = document.getElementById("data").value.trim().toUpperCase();
+let bTotal = parseFloat(document.getElementById("bTotal").value)||0;
+let pTotal = parseFloat(document.getElementById("pTotal").value)||0;
+let h = document.getElementById("history").value.toUpperCase().split(",");
 
-    if(raw.length < 10){
-        out("❌ Nhập tối thiểu 10 ván");
-        return;
-    }
+if(h.length<5){alert("Nhập đủ 5 phiên");return;}
 
-    if(raw.length > 20){
-        out("❌ Tối đa 20 ván");
-        return;
-    }
+// 🔢 base
+let baseB = 0.4586;
+let baseP = 0.4462;
 
-    let arr = raw.split("");
+// 🔵 LONG
+let sum = bTotal + pTotal;
+let longB = sum>0 ? bTotal/sum : 0.5;
+let longP = sum>0 ? pTotal/sum : 0.5;
 
-    memory.push(raw);
-    if(memory.length > 200) memory.shift(); // tránh lag
-    localStorage.setItem("bcr_ai_20", JSON.stringify(memory));
+// 🔴 SHORT
+let w = [1,2,3,5,8];
+let sb=0, sp=0;
 
-    let score = {B:0,P:0};
-    let last = arr[arr.length-1];
-
-    // ===== 1. STREAK =====
-    let streak=1;
-    for(let i=arr.length-2;i>=0;i--){
-        if(arr[i]===last) streak++;
-        else break;
-    }
-    score[last]+=streak*2.5;
-
-    // ===== 2. ĐẢO =====
-    if(arr[arr.length-1]!==arr[arr.length-2]){
-        score[last==="B"?"P":"B"]+=4;
-    }
-
-    // ===== 3. NHỊP (pattern sâu hơn) =====
-    let last3 = arr.slice(-3).join("");
-    let last4 = arr.slice(-4).join("");
-    let last5 = arr.slice(-5).join("");
-
-    if(last3==="BPB"||last3==="PBP"){
-        score[last==="B"?"P":"B"]+=3;
-    }
-
-    if(last4==="BBPP"||last4==="PPBB"){
-        score[last]+=3;
-    }
-
-    if(last5==="BBBPP"||last5==="PPPBB"){
-        score[last]+=4;
-    }
-
-    // ===== 4. TỈ LỆ =====
-    let B = arr.filter(x=>x==="B").length;
-    let P = arr.length - B;
-
-    if(B>P) score["P"]+=3;
-    else score["B"]+=3;
-
-    // ===== 5. TREND =====
-    let trend = Math.abs(B-P);
-    if(trend>=4){
-        score[B>P?"B":"P"]+=4;
-    }
-
-    // ===== 6. PATTERN LẶP =====
-    let str = arr.join("");
-    for(let i=3;i<=6;i++){
-        let sub = str.slice(-i);
-        if(str.indexOf(sub) !== str.length - i){
-            score[last]+=3;
-        }
-    }
-
-    // ===== 7. MEMORY SOI (mạnh hơn) =====
-    let sim={B:0,P:0};
-    memory.forEach(seq=>{
-        if(seq.length>=arr.length){
-            let cut=seq.slice(0,arr.length-1);
-            if(cut===arr.slice(0,arr.length-1).join("")){
-                let next=seq[arr.length-1];
-                if(next) sim[next]++;
-            }
-        }
-    });
-
-    score["B"]+=sim["B"]*3;
-    score["P"]+=sim["P"]*3;
-
-    // ===== 8. MOMENTUM =====
-    let last6 = arr.slice(-6);
-    let momentumB = last6.filter(x=>x==="B").length;
-    let momentumP = 6 - momentumB;
-
-    if(momentumB > momentumP) score["B"]+=2;
-    else score["P"]+=2;
-
-    // ===== FINAL =====
-    let predict = score["B"]>score["P"]?"B":"P";
-    let diff = Math.abs(score["B"]-score["P"]);
-    let confidence = Math.min(97,50+diff*6);
-
-    let action="BỎ";
-    if(confidence>=65) action="ĐÁNH";
-    if(confidence>=80) action="ĐÁNH MẠNH";
-    if(confidence>=90) action="ALL IN (cân nhắc)";
-
-    out(`
-    📊 Chuỗi: ${raw}<br>
-    🔁 Streak: ${streak} (${last})<br><br>
-
-    🧠 AI Score:<br>
-    🟥 B: ${score["B"].toFixed(1)} | 🟦 P: ${score["P"].toFixed(1)}<br><br>
-
-    🔍 Memory AI:<br>
-    🟥 B: ${sim["B"]} | 🟦 P: ${sim["P"]}<br><br>
-
-    📈 Trend: ${B}B - ${P}P<br><br>
-
-    🔮 Kết quả: <b>${predict}</b><br>
-    📊 Tin cậy: ${confidence}%<br><br>
-
-    ⚡ Gợi ý: <b>${action}</b>
-    `);
+for(let i=0;i<5;i++){
+if(h[i].trim()=="B") sb+=w[i];
+if(h[i].trim()=="P") sp+=w[i];
 }
 
-function out(x){
-    document.getElementById("out").innerHTML=x;
+let totalShort = sb+sp;
+let shortB = sb/totalShort;
+let shortP = sp/totalShort;
+
+// ⚡ pattern
+if(h[4]==h[3]){
+if(h[4]=="B") shortB+=0.02;
+else shortP+=0.02;
+}else{
+if(h[4]=="B") shortP+=0.015;
+else shortB+=0.015;
+}
+
+let str = h.join("");
+if(str.includes("BBB")) shortB+=0.03;
+if(str.includes("PPP")) shortP+=0.03;
+
+// 🎯 FINAL
+let finalB = (0.5*shortB)+(0.3*longB)+(0.2*baseB);
+let finalP = (0.5*shortP)+(0.3*longP)+(0.2*baseP);
+
+let total = finalB + finalP;
+
+let bPercent = ((finalB/total)*100).toFixed(2);
+let pPercent = ((finalP/total)*100).toFixed(2);
+
+let res = finalB > finalP ? "🔴 BANKER" : "🔵 PLAYER";
+
+document.getElementById("result").innerHTML =
+`Banker: ${bPercent}%<br>
+ Player: ${pPercent}%<br><br>
+ 👉 ${res}`;
 }
 </script>
 
