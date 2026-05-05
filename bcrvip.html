@@ -2,51 +2,20 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>🔥 Baccarat AI PRO MAX</title>
+<title>🔥 Baccarat AI</title>
 
 <style>
-body{
-    background:#0b0f1a;
-    color:#fff;
-    font-family:Arial;
-    text-align:center;
-    padding:20px;
-}
-.box{
-    max-width:480px;
-    margin:auto;
-    background:#111827;
-    padding:20px;
-    border-radius:12px;
-}
-input{
-    width:100%;
-    padding:10px;
-    margin:6px 0;
-    border:none;
-    border-radius:6px;
-    text-align:center;
-}
-button{
-    padding:10px;
-    border:none;
-    border-radius:6px;
-    font-weight:bold;
-    width:100%;
-}
-.row{
-    display:flex;
-    gap:8px;
-}
-.result{
-    margin-top:15px;
-    font-size:16px;
-    line-height:1.5;
-}
+body{background:#0b0f1a;color:#fff;font-family:Arial;text-align:center;padding:20px;}
+.box{max-width:520px;margin:auto;background:#111827;padding:20px;border-radius:12px;}
+input{width:100%;padding:10px;margin:6px 0;border:none;border-radius:6px;text-align:center;}
+button{padding:10px;border:none;border-radius:6px;font-weight:bold;width:100%;}
+.row{display:flex;gap:8px;}
+.row button{flex:1}
+.result{margin-top:15px;text-align:left;line-height:1.5;}
 .btnP{background:#2196f3;}
 .btnB{background:#e53935;}
 .btnT{background:#fbc02d;color:#000;}
-.btnMain{background:#00ffc3;}
+.btnMain{background:#00ffc3;color:#000;}
 .btnWin{background:#4caf50;}
 .btnLose{background:#ff5252;}
 </style>
@@ -55,28 +24,29 @@ button{
 <body>
 
 <div class="box">
+<h2>🔥 Baccarat AI</h2>
 
-<h2>🔥 Baccarat AI PRO MAX</h2>
-
-<!-- QUICK INPUT -->
 <div class="row">
 <button class="btnP" onclick="add('P')">🔵 Con</button>
 <button class="btnB" onclick="add('B')">🔴 Cái</button>
 <button class="btnT" onclick="add('T')">🟡 Hòa</button>
 </div>
 
-<input id="history" readonly placeholder="Chuỗi sẽ hiển thị tại đây...">
+<input id="history" readonly>
 
-<!-- TOTAL -->
 <input id="bTotal" type="number" placeholder="Tổng cái">
 <input id="pTotal" type="number" placeholder="Tổng con">
 <input id="tTotal" type="number" placeholder="Tổng hòa">
 
 <button class="btnMain" onclick="calc()">📊 Phân tích</button>
 
+<h3>📊 Thống kê</h3>
+<div>✅ Thắng: <span id="win">0</span></div>
+<div>❌ Thua: <span id="lose">0</span></div>
+<div>📈 Tỷ lệ: <span id="rate">0%</span></div>
+
 <div id="result" class="result"></div>
 
-<!-- FEEDBACK -->
 <div class="row" style="margin-top:10px;">
 <button class="btnWin" onclick="feedback(true)">✅ Thắng</button>
 <button class="btnLose" onclick="feedback(false)">❌ Thua</button>
@@ -87,130 +57,120 @@ button{
 <script>
 
 // ===== GLOBAL =====
-let historyArr = [];
-let learningBias = {B:0, P:0, T:0};
-let lastPrediction = null;
+let historyArr=[];
+let learningBias={B:0,P:0,T:0};
+let totalWin=0,totalLose=0;
+let lastPrediction=null;
 
 // ===== ADD =====
 function add(x){
     historyArr.push(x);
+    if(historyArr.length>15) historyArr.shift();
+    history.value=historyArr.join(",");
+}
 
-    if(historyArr.length > 11){
-        historyArr.shift();
+// ===== STREAK =====
+function getStreak(){
+    let last=historyArr.at(-1);
+    let streak=1;
+    for(let i=historyArr.length-2;i>=0;i--){
+        if(historyArr[i]==last) streak++;
+        else break;
     }
-
-    document.getElementById("history").value = historyArr.join(",");
+    return {last,streak};
 }
 
 // ===== CALC =====
 function calc(){
 
-if(historyArr.length < 5){
-    alert("Nhập ít nhất 5 tay!");
+if(historyArr.length<12){
+    alert("⚠️ Cần ít nhất 12 tay!");
     return;
 }
 
-let bTotal = +document.getElementById("bTotal").value;
-let pTotal = +document.getElementById("pTotal").value;
-let tTotal = +document.getElementById("tTotal").value;
-
-if(!bTotal && !pTotal && !tTotal){
-    alert("⚠️ Phải nhập tổng Cái / Con / Hòa!");
-    return;
-}
-
-let sum = bTotal+pTotal+tTotal;
+let bTotal=+bTotalInput.value||0;
+let pTotal=+pTotalInput.value||0;
+let tTotal=+tTotalInput.value||0;
+let sum=bTotal+pTotal+tTotal;
 
 // ===== BASE =====
-let base = {B:0.4586, P:0.4462, T:0.0952};
+let base={B:0.4586,P:0.4462,T:0.0952};
 
 // ===== LONG =====
-let long = {
-    B:(bTotal+1)/(sum+3),
-    P:(pTotal+1)/(sum+3),
-    T:(tTotal+1)/(sum+3)
+let long={
+B:(bTotal+1)/(sum+3),
+P:(pTotal+1)/(sum+3),
+T:(tTotal+1)/(sum+3)
 };
 
 // ===== SHORT =====
-let w = [1,2,3,5,8,13,21,34,55,89,144];
-let short = {B:0,P:0,T:0};
+let w=[144,89,55,34,21,13,8,5,3,2,1];
+let short={B:0,P:0,T:0};
+historyArr.forEach((v,i)=>short[v]+=w[i]||1);
 
-for(let i=0;i<historyArr.length;i++){
-    short[historyArr[i]] += w[i];
-}
-
-let totalShort = short.B+short.P+short.T;
-short.B/=totalShort;
-short.P/=totalShort;
-short.T/=totalShort;
+let ts=short.B+short.P+short.T;
+short.B/=ts; short.P/=ts; short.T/=ts;
 
 // ===== STREAK =====
-let last = historyArr[historyArr.length-1];
-let streak = 1;
+let {last,streak}=getStreak();
 
-for(let i=historyArr.length-2;i>=0;i--){
-    if(historyArr[i]==last) streak++;
-    else break;
+// ===== 🔥 ANTI-STREAK AI =====
+let anti={B:0,P:0,T:0};
+let antiStrength=0;
+
+if(streak>=4){
+    // bắt đầu nghi ngờ bệt
+    antiStrength=0.15;
 }
 
-// ===== PATTERN =====
-let pattern = {B:0,P:0,T:0};
-
-if(streak>=3){
-    if(last=="B"){ pattern.P=0.55; pattern.B=0.35; }
-    if(last=="P"){ pattern.B=0.55; pattern.P=0.35; }
-}else{
-    pattern = {...short};
+if(streak>=5){
+    // bẻ mạnh hơn
+    antiStrength=0.25;
 }
 
-// ===== DYNAMIC WEIGHT =====
-let longWeight = Math.min(0.4, sum / 200);
-let shortWeight = 0.5 - longWeight;
-let baseWeight = 0.2;
-let patternWeight = 0.1;
+if(streak>=6){
+    // cực mạnh
+    antiStrength=0.35;
+}
+
+// hướng bẻ
+if(last=="B") anti.P=antiStrength;
+if(last=="P") anti.B=antiStrength;
 
 // ===== FINAL =====
-let final = {
-    B: shortWeight*short.B + longWeight*long.B + baseWeight*base.B + patternWeight*pattern.B + learningBias.B,
-    P: shortWeight*short.P + longWeight*long.P + baseWeight*base.P + patternWeight*pattern.P + learningBias.P,
-    T: shortWeight*short.T + longWeight*long.T + baseWeight*base.T + patternWeight*pattern.T + learningBias.T
+let final={
+B:0.35*short.B+0.25*long.B+0.2*base.B+anti.B+learningBias.B,
+P:0.35*short.P+0.25*long.P+0.2*base.P+anti.P+learningBias.P,
+T:0.35*short.T+0.25*long.T+0.2*base.T+anti.T+learningBias.T
 };
 
-// normalize
-let total = final.B+final.P+final.T;
-final.B/=total;
-final.P/=total;
-final.T/=total;
+let tot=final.B+final.P+final.T;
+final.B/=tot; final.P/=tot; final.T/=tot;
 
 // ===== RESULT =====
-let result="🔴 CÁI";
-let max=final.B;
+let result="🔴 CÁI",max=final.B;
+if(final.P>max){result="🔵 CON";max=final.P;}
+if(final.T>max){result="🟡 HÒA";max=final.T;}
 
-if(final.P>max){ result="🔵 CON"; max=final.P; }
-if(final.T>max){ result="🟡 HÒA"; max=final.T; }
+lastPrediction=result;
 
-lastPrediction = result;
+// ===== CONFIDENCE =====
+let arr=[final.B,final.P,final.T].sort((a,b)=>b-a);
+let confidence=((arr[0]-arr[1])*100).toFixed(1);
 
 // ===== DISPLAY =====
-document.getElementById("result").innerHTML =
+resultDiv.innerHTML=
+`📈 Streak: ${streak}
+🧠 Anti-bệt: ${(antiStrength*100).toFixed(0)}%
 
-`📊 <b>BIAS TỔNG</b><br>
-🔴 Cái: ${(long.B*100).toFixed(1)}% (${bTotal})<br>
-🔵 Con: ${(long.P*100).toFixed(1)}% (${pTotal})<br>
-🟡 Hòa: ${(long.T*100).toFixed(1)}% (${tTotal})<br><br>
+🔴 ${(final.B*100).toFixed(2)}%
+🔵 ${(final.P*100).toFixed(2)}%
+🟡 ${(final.T*100).toFixed(2)}%
 
-⚡ <b>CHUỖI GẦN</b><br>
-🔴 ${(short.B*100).toFixed(1)}% | 🔵 ${(short.P*100).toFixed(1)}% | 🟡 ${(short.T*100).toFixed(1)}%<br>
-📈 Streak: ${streak}<br><br>
+👉 <b>${result}</b>
+🔥 Confidence: ${confidence}%`;
 
-🎯 <b>DỰ ĐOÁN</b><br>
-🔴 ${(final.B*100).toFixed(2)}%<br>
-🔵 ${(final.P*100).toFixed(2)}%<br>
-🟡 ${(final.T*100).toFixed(2)}%<br><br>
-
-👉 <b>${result}</b><br>
-
-💡 Weight: Short ${(shortWeight*100).toFixed(0)}% | Long ${(longWeight*100).toFixed(0)}%`;
+updateStats();
 }
 
 // ===== FEEDBACK =====
@@ -218,28 +178,38 @@ function feedback(win){
 
 if(!lastPrediction) return;
 
-// map lại key
-let map = {
-    "🔴 CÁI":"B",
-    "🔵 CON":"P",
-    "🟡 HÒA":"T"
-};
+totalWin+=win?1:0;
+totalLose+=win?0:1;
 
-let key = map[lastPrediction];
+let map={"🔴 CÁI":"B","🔵 CON":"P","🟡 HÒA":"T"};
+let key=map[lastPrediction];
 
 if(win){
-    learningBias[key] += 0.01;
+learningBias[key]+=0.01;
 }else{
-    learningBias[key] -= 0.02;
+learningBias[key]-=0.03;
+if(key=="B") learningBias.P+=0.02;
+if(key=="P") learningBias.B+=0.02;
 }
 
-// clamp
+// decay
 for(let k in learningBias){
-    if(learningBias[k] > 0.05) learningBias[k] = 0.05;
-    if(learningBias[k] < -0.05) learningBias[k] = -0.05;
+learningBias[k]*=0.97;
+learningBias[k]=Math.max(-0.1,Math.min(0.1,learningBias[k]));
 }
 
-alert(win ? "✔ AI ghi nhận thắng" : "❌ AI điều chỉnh sau thua");
+updateStats();
+
+// auto calc lại khi thua
+if(!win) setTimeout(calc,300);
+}
+
+// ===== STATS =====
+function updateStats(){
+win.innerText=totalWin;
+lose.innerText=totalLose;
+let t=totalWin+totalLose;
+rate.innerText=t?((totalWin/t*100).toFixed(1)+"%"):"0%";
 }
 
 </script>
