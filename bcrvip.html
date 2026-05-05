@@ -2,16 +2,46 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>🔥 Baccarat AI</title>
+<title>🔥 Baccarat AI GOD MODE V5 FIX</title>
 
 <style>
-body{background:#0b0f1a;color:#fff;font-family:Arial;text-align:center;padding:20px;}
-.box{max-width:520px;margin:auto;background:#111827;padding:20px;border-radius:12px;}
-input{width:100%;padding:10px;margin:6px 0;border:none;border-radius:6px;text-align:center;}
-button{padding:10px;border:none;border-radius:6px;font-weight:bold;width:100%;}
+body{
+    background:#0b0f1a;
+    color:#fff;
+    font-family:Arial;
+    text-align:center;
+    padding:20px;
+}
+.box{
+    max-width:520px;
+    margin:auto;
+    background:#111827;
+    padding:20px;
+    border-radius:12px;
+}
+input{
+    width:100%;
+    padding:10px;
+    margin:6px 0;
+    border:none;
+    border-radius:6px;
+    text-align:center;
+}
+button{
+    padding:10px;
+    border:none;
+    border-radius:6px;
+    font-weight:bold;
+    width:100%;
+    cursor:pointer;
+}
 .row{display:flex;gap:8px;}
 .row button{flex:1}
-.result{margin-top:15px;text-align:left;line-height:1.5;}
+.result{
+    margin-top:15px;
+    text-align:left;
+    line-height:1.5;
+}
 .btnP{background:#2196f3;}
 .btnB{background:#e53935;}
 .btnT{background:#fbc02d;color:#000;}
@@ -24,7 +54,7 @@ button{padding:10px;border:none;border-radius:6px;font-weight:bold;width:100%;}
 <body>
 
 <div class="box">
-<h2>🔥 Baccarat AI</h2>
+<h2>🔥 Baccarat AI GOD MODE V5 FIX</h2>
 
 <div class="row">
 <button class="btnP" onclick="add('P')">🔵 Con</button>
@@ -32,7 +62,7 @@ button{padding:10px;border:none;border-radius:6px;font-weight:bold;width:100%;}
 <button class="btnT" onclick="add('T')">🟡 Hòa</button>
 </div>
 
-<input id="history" readonly>
+<input id="history" readonly placeholder="Chuỗi...">
 
 <input id="bTotal" type="number" placeholder="Tổng cái">
 <input id="pTotal" type="number" placeholder="Tổng con">
@@ -56,6 +86,16 @@ button{padding:10px;border:none;border-radius:6px;font-weight:bold;width:100%;}
 
 <script>
 
+// ===== DOM =====
+const historyInput = document.getElementById("history");
+const bTotalInput = document.getElementById("bTotal");
+const pTotalInput = document.getElementById("pTotal");
+const tTotalInput = document.getElementById("tTotal");
+const resultDiv = document.getElementById("result");
+const winEl = document.getElementById("win");
+const loseEl = document.getElementById("lose");
+const rateEl = document.getElementById("rate");
+
 // ===== GLOBAL =====
 let historyArr=[];
 let learningBias={B:0,P:0,T:0};
@@ -66,12 +106,13 @@ let lastPrediction=null;
 function add(x){
     historyArr.push(x);
     if(historyArr.length>15) historyArr.shift();
-    history.value=historyArr.join(",");
+    historyInput.value=historyArr.join(",");
 }
 
 // ===== STREAK =====
 function getStreak(){
-    let last=historyArr.at(-1);
+    if(historyArr.length===0) return {last:null,streak:0};
+    let last=historyArr[historyArr.length-1];
     let streak=1;
     for(let i=historyArr.length-2;i>=0;i--){
         if(historyArr[i]==last) streak++;
@@ -91,53 +132,48 @@ if(historyArr.length<12){
 let bTotal=+bTotalInput.value||0;
 let pTotal=+pTotalInput.value||0;
 let tTotal=+tTotalInput.value||0;
+
+if(!bTotal && !pTotal && !tTotal){
+    alert("⚠️ Nhập tổng!");
+    return;
+}
+
 let sum=bTotal+pTotal+tTotal;
 
-// ===== BASE =====
+// BASE
 let base={B:0.4586,P:0.4462,T:0.0952};
 
-// ===== LONG =====
+// LONG
 let long={
 B:(bTotal+1)/(sum+3),
 P:(pTotal+1)/(sum+3),
 T:(tTotal+1)/(sum+3)
 };
 
-// ===== SHORT =====
+// SHORT
 let w=[144,89,55,34,21,13,8,5,3,2,1];
 let short={B:0,P:0,T:0};
+
 historyArr.forEach((v,i)=>short[v]+=w[i]||1);
 
 let ts=short.B+short.P+short.T;
 short.B/=ts; short.P/=ts; short.T/=ts;
 
-// ===== STREAK =====
+// STREAK
 let {last,streak}=getStreak();
 
-// ===== 🔥 ANTI-STREAK AI =====
+// ANTI BỆT
 let anti={B:0,P:0,T:0};
 let antiStrength=0;
 
-if(streak>=4){
-    // bắt đầu nghi ngờ bệt
-    antiStrength=0.15;
-}
+if(streak>=4) antiStrength=0.15;
+if(streak>=5) antiStrength=0.25;
+if(streak>=6) antiStrength=0.35;
 
-if(streak>=5){
-    // bẻ mạnh hơn
-    antiStrength=0.25;
-}
-
-if(streak>=6){
-    // cực mạnh
-    antiStrength=0.35;
-}
-
-// hướng bẻ
 if(last=="B") anti.P=antiStrength;
 if(last=="P") anti.B=antiStrength;
 
-// ===== FINAL =====
+// FINAL
 let final={
 B:0.35*short.B+0.25*long.B+0.2*base.B+anti.B+learningBias.B,
 P:0.35*short.P+0.25*long.P+0.2*base.P+anti.P+learningBias.P,
@@ -147,18 +183,18 @@ T:0.35*short.T+0.25*long.T+0.2*base.T+anti.T+learningBias.T
 let tot=final.B+final.P+final.T;
 final.B/=tot; final.P/=tot; final.T/=tot;
 
-// ===== RESULT =====
+// RESULT
 let result="🔴 CÁI",max=final.B;
 if(final.P>max){result="🔵 CON";max=final.P;}
 if(final.T>max){result="🟡 HÒA";max=final.T;}
 
 lastPrediction=result;
 
-// ===== CONFIDENCE =====
+// CONFIDENCE
 let arr=[final.B,final.P,final.T].sort((a,b)=>b-a);
 let confidence=((arr[0]-arr[1])*100).toFixed(1);
 
-// ===== DISPLAY =====
+// DISPLAY
 resultDiv.innerHTML=
 `📈 Streak: ${streak}
 🧠 Anti-bệt: ${(antiStrength*100).toFixed(0)}%
@@ -178,8 +214,8 @@ function feedback(win){
 
 if(!lastPrediction) return;
 
-totalWin+=win?1:0;
-totalLose+=win?0:1;
+if(win) totalWin++;
+else totalLose++;
 
 let map={"🔴 CÁI":"B","🔵 CON":"P","🟡 HÒA":"T"};
 let key=map[lastPrediction];
@@ -198,18 +234,18 @@ learningBias[k]*=0.97;
 learningBias[k]=Math.max(-0.1,Math.min(0.1,learningBias[k]));
 }
 
-updateStats();
-
 // auto calc lại khi thua
 if(!win) setTimeout(calc,300);
+
+updateStats();
 }
 
 // ===== STATS =====
 function updateStats(){
-win.innerText=totalWin;
-lose.innerText=totalLose;
+winEl.innerText=totalWin;
+loseEl.innerText=totalLose;
 let t=totalWin+totalLose;
-rate.innerText=t?((totalWin/t*100).toFixed(1)+"%"):"0%";
+rateEl.innerText=t?((totalWin/t*100).toFixed(1)+"%"):"0%";
 }
 
 </script>
