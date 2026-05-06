@@ -2,30 +2,12 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>🔥 Baccarat AI ADVANCED</title>
+<title>🔥 Baccarat AI ULTRA</title>
 
 <style>
-body{
-    background:#0b0f1a;
-    color:#fff;
-    font-family:Arial;
-    text-align:center;
-    padding:20px;
-}
-.box{
-    max-width:520px;
-    margin:auto;
-    background:#111827;
-    padding:20px;
-    border-radius:12px;
-}
-button,input{
-    padding:10px;
-    border:none;
-    border-radius:6px;
-    width:100%;
-    margin:5px 0;
-}
+body{background:#0b0f1a;color:#fff;font-family:Arial;text-align:center;padding:20px;}
+.box{max-width:520px;margin:auto;background:#111827;padding:20px;border-radius:12px;}
+button,input{padding:10px;border:none;border-radius:6px;width:100%;margin:5px 0;}
 .row{display:flex;gap:8px;}
 .btnP{background:#2196f3;}
 .btnB{background:#e53935;}
@@ -38,7 +20,7 @@ button,input{
 <body>
 
 <div class="box">
-<h2>🔥 Baccarat AI ADVANCED</h2>
+<h2>🔥 Baccarat AI ULTRA</h2>
 
 <div class="row">
 <button class="btnP" onclick="add('P')">🔵 Con</button>
@@ -60,7 +42,7 @@ button,input{
 
 <script>
 
-let historyArr = [];
+let historyArr=[];
 
 // ===== ADD =====
 function add(x){
@@ -68,13 +50,29 @@ function add(x){
     document.getElementById("history").value = historyArr.join(",");
 }
 
+// ===== MARKOV N =====
+function markovN(n){
+
+    let map={};
+
+    for(let i=0;i<historyArr.length-n;i++){
+        let key=historyArr.slice(i,i+n).join("");
+        let next=historyArr[i+n];
+
+        if(!map[key]) map[key]={B:0,P:0,T:0};
+        map[key][next]++;
+    }
+
+    return map;
+}
+
 // ===== CALC =====
 function calc(){
 
-let resultDiv = document.getElementById("result");
+let resultDiv=document.getElementById("result");
 
-if(historyArr.length < 5){
-    alert("Nhập ít nhất 5 tay!");
+if(historyArr.length<6){
+    alert("Nhập ít nhất 6 tay!");
     return;
 }
 
@@ -87,60 +85,59 @@ full.B/=total;
 full.P/=total;
 full.T/=total;
 
-// ===== MARKOV (CHUỖI CHUYỂN TIẾP) =====
-let markov={
-    B:{B:0,P:0,T:0},
-    P:{B:0,P:0,T:0},
-    T:{B:0,P:0,T:0}
-};
+// ===== MARKOV =====
+let m1=markovN(1);
+let m2=markovN(2);
+let m3=markovN(3);
 
-for(let i=0;i<historyArr.length-1;i++){
-    let cur=historyArr[i];
-    let next=historyArr[i+1];
-    markov[cur][next]++;
+let last1=historyArr.slice(-1).join("");
+let last2=historyArr.slice(-2).join("");
+let last3=historyArr.slice(-3).join("");
+
+function getProb(map,key){
+    if(!map[key]) return {B:0.33,P:0.33,T:0.34};
+    let s=map[key].B+map[key].P+map[key].T;
+    return {
+        B:map[key].B/s,
+        P:map[key].P/s,
+        T:map[key].T/s
+    };
 }
 
-// chuẩn hóa
-for(let k in markov){
-    let sum=markov[k].B+markov[k].P+markov[k].T;
-    if(sum>0){
-        markov[k].B/=sum;
-        markov[k].P/=sum;
-        markov[k].T/=sum;
+let mk1=getProb(m1,last1);
+let mk2=getProb(m2,last2);
+let mk3=getProb(m3,last3);
+
+// ===== PATTERN LẶP =====
+let pattern={B:0,P:0,T:0};
+
+for(let i=0;i<historyArr.length-4;i++){
+    let seq=historyArr.slice(i,i+3).join("");
+    let next=historyArr[i+3];
+
+    if(seq===last3){
+        pattern[next]++;
     }
 }
 
-// lấy trạng thái hiện tại
-let last=historyArr[historyArr.length-1];
-let markovProb = markov[last];
+let pSum=pattern.B+pattern.P+pattern.T;
+if(pSum>0){
+    pattern.B/=pSum;
+    pattern.P/=pSum;
+    pattern.T/=pSum;
+}else{
+    pattern={...full};
+}
 
-// ===== SHORT TREND =====
+// ===== SHORT =====
 let recent=historyArr.slice(-10);
 let short={B:0,P:0,T:0};
-
 recent.forEach(x=>short[x]++);
-let totalShort=recent.length;
+let sTotal=recent.length;
 
-short.B/=totalShort;
-short.P/=totalShort;
-short.T/=totalShort;
-
-// ===== STREAK =====
-let streak=1;
-for(let i=historyArr.length-2;i>=0;i--){
-    if(historyArr[i]==last) streak++;
-    else break;
-}
-
-// ===== PATTERN =====
-let pattern={B:0,P:0,T:0};
-
-if(streak>=4){
-    if(last=="B"){pattern.P=0.65;pattern.B=0.25;}
-    if(last=="P"){pattern.B=0.65;pattern.P=0.25;}
-}else{
-    pattern={...short};
-}
+short.B/=sTotal;
+short.P/=sTotal;
+short.T/=sTotal;
 
 // ===== TOTAL INPUT =====
 let bTotal=Number(document.getElementById("bTotal").value)||0;
@@ -149,7 +146,7 @@ let tTotal=Number(document.getElementById("tTotal").value)||0;
 
 let sum=bTotal+pTotal+tTotal;
 
-let totalAI = sum>0 ? {
+let totalAI=sum>0?{
     B:(bTotal+1)/(sum+3),
     P:(pTotal+1)/(sum+3),
     T:(tTotal+1)/(sum+3)
@@ -157,16 +154,16 @@ let totalAI = sum>0 ? {
 
 // ===== FINAL BLEND =====
 let final={
-    B:0.30*full.B + 0.25*markovProb.B + 0.20*short.B + 0.15*pattern.B + 0.10*totalAI.B,
-    P:0.30*full.P + 0.25*markovProb.P + 0.20*short.P + 0.15*pattern.P + 0.10*totalAI.P,
-    T:0.30*full.T + 0.25*markovProb.T + 0.20*short.T + 0.15*pattern.T + 0.10*totalAI.T
+    B:0.25*full.B + 0.20*mk1.B + 0.15*mk2.B + 0.10*mk3.B + 0.10*pattern.B + 0.10*short.B + 0.10*totalAI.B,
+    P:0.25*full.P + 0.20*mk1.P + 0.15*mk2.P + 0.10*mk3.P + 0.10*pattern.P + 0.10*short.P + 0.10*totalAI.P,
+    T:0.25*full.T + 0.20*mk1.T + 0.15*mk2.T + 0.10*mk3.T + 0.10*pattern.T + 0.10*short.T + 0.10*totalAI.T
 };
 
 // normalize
-let sumF=final.B+final.P+final.T;
-final.B/=sumF;
-final.P/=sumF;
-final.T/=sumF;
+let fSum=final.B+final.P+final.T;
+final.B/=fSum;
+final.P/=fSum;
+final.T/=fSum;
 
 // ===== RESULT =====
 let result="🔴 CÁI";
@@ -177,15 +174,16 @@ if(final.T>max){result="🟡 HÒA";}
 
 // ===== UI =====
 function bar(p,c){
-    return `<div class="bar" style="width:${p}%;background:${c}"></div>`;
+return `<div class="bar" style="width:${p}%;background:${c}"></div>`;
 }
 
 resultDiv.innerHTML=`
-🔥 <b>AI PHÂN TÍCH CHUỖI</b><br><br>
+🔥 <b>AI PHÂN TÍCH TOÀN CHUỖI</b><br><br>
 
 📊 FULL: ${(full.B*100).toFixed(1)} / ${(full.P*100).toFixed(1)} / ${(full.T*100).toFixed(1)}<br>
-🔗 MARKOV (sau ${last}): ${(markovProb.B*100).toFixed(1)} / ${(markovProb.P*100).toFixed(1)} / ${(markovProb.T*100).toFixed(1)}<br>
-⚡ SHORT: ${(short.B*100).toFixed(1)} / ${(short.P*100).toFixed(1)} / ${(short.T*100).toFixed(1)}<br>
+🧠 MK1: ${(mk1.B*100).toFixed(1)} / ${(mk1.P*100).toFixed(1)} / ${(mk1.T*100).toFixed(1)}<br>
+🧠 MK2: ${(mk2.B*100).toFixed(1)} / ${(mk2.P*100).toFixed(1)} / ${(mk2.T*100).toFixed(1)}<br>
+🧠 MK3: ${(mk3.B*100).toFixed(1)} / ${(mk3.P*100).toFixed(1)} / ${(mk3.T*100).toFixed(1)}<br>
 
 <br>🎯 FINAL<br>
 
@@ -198,7 +196,6 @@ ${bar(final.P*100,'#2196f3')}
 🟡 ${(final.T*100).toFixed(2)}%
 ${bar(final.T*100,'#fbc02d')}
 
-<br>📈 Streak: ${streak}
 <br><br>👉 <b>${result}</b>
 `;
 
