@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>🔥 Baccarat PRNG Predictor PRO</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    color:#fff;
+    text-align:center;
+}
+
+.container{
+    padding:20px;
+}
+
+h1{
+    color:#00ffd5;
+}
+
+.box{
+    background:#00000055;
+    padding:20px;
+    border-radius:10px;
+    display:inline-block;
+}
+
+input{
+    padding:12px;
+    margin:8px;
+    border:none;
+    border-radius:5px;
+    width:140px;
+    text-align:center;
+    font-size:16px;
+}
+
+button{
+    padding:12px 25px;
+    border:none;
+    border-radius:5px;
+    background:#00ffd5;
+    color:#000;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.result{
+    margin-top:20px;
+    font-size:20px;
+}
+
+.strong{
+    color:#00ff88;
+    font-size:24px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>🤖 BACCARAT AI PRNG PRO</h1>
+
+<div class="box">
+    <p>Nhập tổng điểm</p>
+    <input id="player" placeholder="Tổng CON (Player)">
+    <input id="banker" placeholder="Tổng CÁI (Banker)">
+    <br>
+    <button onclick="analyze()">PHÂN TÍCH</button>
+</div>
+
+<div class="result" id="result"></div>
+
+</div>
+
+<script>
+
+// ====== PCG RANDOM ======
+let seed = Date.now();
+
+function pcg(){
+    seed = (seed * 1664525 + 1013904223) % 4294967296;
+    return seed / 4294967296;
+}
+
+// ====== MERSENNE TWISTER (simple version) ======
+class MT {
+    constructor(seed){
+        this.mt = new Array(624);
+        this.index = 0;
+        this.mt[0] = seed;
+
+        for(let i=1;i<624;i++){
+            this.mt[i] = (1812433253 * (this.mt[i-1] ^ (this.mt[i-1] >> 30)) + i);
+        }
+    }
+
+    extract(){
+        if(this.index === 0){
+            this.generate();
+        }
+
+        let y = this.mt[this.index];
+        y ^= y >> 11;
+        y ^= (y << 7) & 2636928640;
+        y ^= (y << 15) & 4022730752;
+        y ^= y >> 18;
+
+        this.index = (this.index + 1) % 624;
+        return y / 4294967296;
+    }
+
+    generate(){
+        for(let i=0;i<624;i++){
+            let y = (this.mt[i] & 0x80000000) + (this.mt[(i+1)%624] & 0x7fffffff);
+            this.mt[i] = this.mt[(i+397)%624] ^ (y >> 1);
+
+            if(y % 2 !== 0){
+                this.mt[i] ^= 2567483615;
+            }
+        }
+    }
+}
+
+let mt = new MT(Date.now());
+
+// ====== MONTE CARLO ======
+function simulate(player, banker, runs=100000){
+    let pWin=0, bWin=0, tie=0;
+
+    for(let i=0;i<runs;i++){
+
+        // mix PRNG
+        let r1 = pcg();
+        let r2 = mt.extract();
+
+        let pScore = (player + Math.floor(r1*10)) % 10;
+        let bScore = (banker + Math.floor(r2*10)) % 10;
+
+        if(pScore > bScore) pWin++;
+        else if(bScore > pScore) bWin++;
+        else tie++;
+    }
+
+    return {
+        p:(pWin/runs*100).toFixed(2),
+        b:(bWin/runs*100).toFixed(2),
+        t:(tie/runs*100).toFixed(2)
+    };
+}
+
+// ====== MAIN ======
+function analyze(){
+    let player = parseInt(document.getElementById("player").value);
+    let banker = parseInt(document.getElementById("banker").value);
+
+    if(isNaN(player) || isNaN(banker)){
+        alert("Nhập đủ tổng Con và Cái!");
+        return;
+    }
+
+    let res = simulate(player, banker, 100000);
+
+    let prediction = "";
+    let confidence = Math.abs(res.p - res.b);
+
+    if(res.p > res.b){
+        prediction = "PLAYER";
+    }else{
+        prediction = "BANKER";
+    }
+
+    document.getElementById("result").innerHTML = `
+        Player: ${res.p}%<br>
+        Banker: ${res.b}%<br>
+        Tie: ${res.t}%<br><br>
+
+        <div class="strong">👉 Dự đoán: ${prediction}</div>
+        🔥 Độ tin cậy: ${confidence.toFixed(2)}%
+    `;
+}
+
+</script>
+
+</body>
+</html>
