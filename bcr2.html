@@ -2,44 +2,51 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Baccarat Pattern Analyzer</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pattern Analyzer</title>
 
 <style>
+*{
+    box-sizing:border-box;
+}
+
 body{
+    margin:0;
+    padding:20px;
     background:#0f172a;
-    color:#fff;
-    font-family:Arial,sans-serif;
+    color:white;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+.container{
     max-width:1000px;
     margin:auto;
+}
+
+.card{
+    background:#1e293b;
     padding:20px;
+    border-radius:15px;
 }
 
 h1{
     text-align:center;
 }
 
-.card{
-    background:#1e293b;
-    padding:20px;
-    border-radius:12px;
-    margin-top:20px;
-}
-
 input{
     width:100%;
-    padding:14px;
+    padding:15px;
+    font-size:18px;
     border:none;
     border-radius:10px;
     background:#334155;
     color:white;
-    font-size:18px;
 }
 
 button{
     width:100%;
-    padding:15px;
     margin-top:15px;
+    padding:15px;
     border:none;
     border-radius:10px;
     background:#22c55e;
@@ -49,14 +56,14 @@ button{
 }
 
 button:hover{
-    background:#16a34a;
+    opacity:.9;
 }
 
 .result{
     margin-top:20px;
-    background:#111827;
     padding:20px;
     border-radius:10px;
+    background:#111827;
 }
 
 .success{
@@ -64,26 +71,41 @@ button:hover{
     font-weight:bold;
 }
 
-.ai{
+.warning{
     color:#f59e0b;
     font-weight:bold;
 }
 
 .big{
-    font-size:32px;
+    font-size:40px;
     font-weight:bold;
+    margin:10px 0;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:15px;
+}
+
+td,th{
+    border:1px solid #374151;
+    padding:8px;
+    text-align:center;
 }
 </style>
 </head>
 <body>
 
-<h1>Baccarat Pattern Analyzer</h1>
+<div class="container">
 
 <div class="card">
 
+<h1>Pattern Analyzer</h1>
+
 <input
 id="pattern"
-placeholder="Nhập chuỗi B/P/T (ví dụ: bpbpbpp)"
+placeholder="Nhập chuỗi B/P/T (tối thiểu 7 ký tự)"
 >
 
 <button onclick="analyze()">
@@ -91,7 +113,9 @@ PHÂN TÍCH
 </button>
 
 <div id="result" class="result">
-Chờ nhập dữ liệu...
+Nhập chuỗi và bấm phân tích.
+</div>
+
 </div>
 
 </div>
@@ -106,16 +130,28 @@ bbpppbpbbbbppppppbpbtppbpbpbbtbbpbppp
 btbppbbttbbbbtbbbbbbbpptppbbpbbbpbbbpbbbppppbppbbbpbtppp
 btbptpbtbppbppbbtbbbbpbtpbppppbpbbppppb
 `
-.replace(/\s/g,'')
+.replace(/\s/g,"")
 .toLowerCase();
+
+function similarity(a,b){
+
+    let score = 0;
+
+    for(let i=0;i<a.length;i++){
+        if(a[i]===b[i]) score++;
+    }
+
+    return score / a.length;
+}
 
 function analyze(){
 
-    let pattern = document
-        .getElementById("pattern")
-        .value
-        .toLowerCase()
-        .replace(/[^bpt]/g,'');
+    let pattern =
+    document
+    .getElementById("pattern")
+    .value
+    .toLowerCase()
+    .replace(/[^bpt]/g,"");
 
     if(pattern.length < 7){
         alert("Nhập tối thiểu 7 ký tự");
@@ -124,38 +160,43 @@ function analyze(){
 
     let found = false;
 
-    for(let len = pattern.length; len >= 7; len--){
+    for(let len=pattern.length;len>=7;len--){
 
         let search = pattern.slice(-len);
 
-        let nextResults = [];
+        let nextChars = [];
 
         for(let i=0;i<DATABASE.length-len;i++){
 
-            let part = DATABASE.substring(i,i+len);
+            let sub =
+            DATABASE.substring(
+                i,
+                i+len
+            );
 
-            if(part === search){
+            if(sub===search){
 
-                let nextChar =
-                    DATABASE[i+len];
+                let next =
+                DATABASE[i+len];
 
-                if(nextChar)
-                    nextResults.push(nextChar);
+                if(next){
+                    nextChars.push(next);
+                }
             }
         }
 
-        if(nextResults.length){
+        if(nextChars.length){
 
             found = true;
 
             let b =
-            nextResults.filter(x=>x==="b").length;
+            nextChars.filter(x=>x==="b").length;
 
             let p =
-            nextResults.filter(x=>x==="p").length;
+            nextChars.filter(x=>x==="p").length;
 
             let t =
-            nextResults.filter(x=>x==="t").length;
+            nextChars.filter(x=>x==="t").length;
 
             let result="B";
             let max=b;
@@ -170,102 +211,196 @@ function analyze(){
                 result="T";
             }
 
-            let confidence=
-            ((max/nextResults.length)*100)
-            .toFixed(1);
+            let confidence =
+            (
+                max /
+                nextChars.length *
+                100
+            ).toFixed(1);
 
             document
             .getElementById("result")
-            .innerHTML=
-            `
+            .innerHTML = `
             <div class="success">
-            TRÙNG CHUỖI KẾT QUẢ LÀ
+            TRÙNG CHUỖI
             </div>
 
-            <div class="big">
-            ${result}
-            </div>
-
-            <hr>
+            <div class="big">${result}</div>
 
             <b>Chuỗi khớp:</b> ${search}<br>
             <b>Độ dài:</b> ${len}<br>
-            <b>Số lần xuất hiện:</b> ${nextResults.length}<br><br>
+            <b>Số lần xuất hiện:</b> ${nextChars.length}<br>
+            <b>Tỷ lệ ký tự phổ biến nhất:</b> ${confidence}%<br>
 
-            B = ${b}<br>
-            P = ${p}<br>
-            T = ${t}<br><br>
+            <table>
+            <tr>
+            <th>B</th>
+            <th>P</th>
+            <th>T</th>
+            </tr>
+            <tr>
+            <td>${b}</td>
+            <td>${p}</td>
+            <td>${t}</td>
+            </tr>
+            </table>
 
-            <b>Độ tin cậy:</b>
-            ${confidence}%<br><br>
+            <br>
 
-            <b>Các kết quả sau chuỗi:</b><br>
-            ${nextResults.join(" ")}
+            <b>Các ký tự theo sau mẫu:</b><br>
+            ${nextChars.join(" ")}
             `;
 
             return;
         }
     }
 
-    let recent =
-    DATABASE.slice(-40);
+    aiAnalysis(pattern);
+}
 
-    let b =
-    (recent.match(/b/g)||[]).length;
+function aiAnalysis(pattern){
 
-    let p =
-    (recent.match(/p/g)||[]).length;
+    let candidates = [];
 
-    let t =
-    (recent.match(/t/g)||[]).length;
+    for(
+        let i=0;
+        i<DATABASE.length-pattern.length;
+        i++
+    ){
 
-    let result = "B";
+        let sample =
+        DATABASE.substring(
+            i,
+            i+pattern.length
+        );
 
-    if(p>b)
-        result="P";
+        let next =
+        DATABASE[
+            i+pattern.length
+        ];
 
-    if(t>b && t>p)
-        result="T";
+        if(!next) continue;
 
-    let confidence = 55;
+        let sim =
+        similarity(
+            pattern,
+            sample
+        );
 
-    let diff =
-    Math.abs(b-p);
+        candidates.push({
+            sample,
+            next,
+            sim
+        });
+    }
 
-    if(diff>=3)
-        confidence+=5;
+    candidates.sort(
+        (a,b)=>
+        b.sim-a.sim
+    );
 
-    if(diff>=6)
-        confidence+=5;
+    candidates =
+    candidates.slice(0,20);
 
-    if(diff>=10)
-        confidence+=5;
+    let scoreB=0;
+    let scoreP=0;
+    let scoreT=0;
+
+    candidates.forEach(item=>{
+
+        if(item.next==="b")
+            scoreB += item.sim;
+
+        if(item.next==="p")
+            scoreP += item.sim;
+
+        if(item.next==="t")
+            scoreT += item.sim;
+    });
+
+    let total =
+    scoreB +
+    scoreP +
+    scoreT;
+
+    if(total===0){
+        total=1;
+    }
+
+    let pb =
+    (
+        scoreB/total*100
+    ).toFixed(1);
+
+    let pp =
+    (
+        scoreP/total*100
+    ).toFixed(1);
+
+    let pt =
+    (
+        scoreT/total*100
+    ).toFixed(1);
+
+    let rows="";
+
+    candidates.forEach(item=>{
+
+        rows += `
+        <tr>
+        <td>${item.sample}</td>
+        <td>${(item.sim*100).toFixed(1)}%</td>
+        <td>${item.next.toUpperCase()}</td>
+        </tr>
+        `;
+    });
 
     document
     .getElementById("result")
-    .innerHTML=
-    `
-    <div class="ai">
-    AI PHÂN TÍCH KẾT QUẢ LÀ
+    .innerHTML = `
+
+    <div class="warning">
+    KHÔNG TÌM THẤY CHUỖI TRÙNG
     </div>
 
-    <div class="big">
-    ${result}
-    </div>
+    <br>
 
-    <hr>
+    Đã thực hiện phân tích các mẫu tương đồng nhất trong dữ liệu.
 
-    Không tìm thấy chuỗi trùng từ
-    ${pattern.length} → 7 ký tự.<br><br>
+    <table>
+    <tr>
+    <th>Ký tự</th>
+    <th>Tỷ lệ</th>
+    </tr>
+    <tr>
+    <td>B</td>
+    <td>${pb}%</td>
+    </tr>
+    <tr>
+    <td>P</td>
+    <td>${pp}%</td>
+    </tr>
+    <tr>
+    <td>T</td>
+    <td>${pt}%</td>
+    </tr>
+    </table>
 
-    B = ${b}<br>
-    P = ${p}<br>
-    T = ${t}<br><br>
+    <br>
 
-    <b>Độ tin cậy:</b>
-    ${confidence}%
+    <b>20 mẫu tương đồng nhất</b>
+
+    <table>
+    <tr>
+    <th>Mẫu</th>
+    <th>Độ giống</th>
+    <th>Ký tự sau</th>
+    </tr>
+    ${rows}
+    </table>
     `;
 }
+
 </script>
 
 </body>
