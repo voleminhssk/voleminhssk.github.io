@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Baccarat Pattern Analyzer</title>
+
+<style>
+body{
+    background:#0f172a;
+    color:#fff;
+    font-family:Arial,sans-serif;
+    max-width:1000px;
+    margin:auto;
+    padding:20px;
+}
+
+h1{
+    text-align:center;
+}
+
+.card{
+    background:#1e293b;
+    padding:20px;
+    border-radius:12px;
+    margin-top:20px;
+}
+
+input{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:10px;
+    background:#334155;
+    color:white;
+    font-size:18px;
+}
+
+button{
+    width:100%;
+    padding:15px;
+    margin-top:15px;
+    border:none;
+    border-radius:10px;
+    background:#22c55e;
+    color:white;
+    font-size:18px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#16a34a;
+}
+
+.result{
+    margin-top:20px;
+    background:#111827;
+    padding:20px;
+    border-radius:10px;
+}
+
+.success{
+    color:#22c55e;
+    font-weight:bold;
+}
+
+.ai{
+    color:#f59e0b;
+    font-weight:bold;
+}
+
+.big{
+    font-size:32px;
+    font-weight:bold;
+}
+</style>
+</head>
+<body>
+
+<h1>Baccarat Pattern Analyzer</h1>
+
+<div class="card">
+
+<input
+id="pattern"
+placeholder="Nhập chuỗi B/P/T (ví dụ: bpbpbpp)"
+>
+
+<button onclick="analyze()">
+PHÂN TÍCH
+</button>
+
+<div id="result" class="result">
+Chờ nhập dữ liệu...
+</div>
+
+</div>
+
+<script>
+
+const DATABASE = `
+ppppbbbpppbtbppbbttbbbbtbbbbbbbpptppbbpbbbpbbbpbbbppp
+pbbpbbbbppppppbtbbppbtpppbbpppbbpbbbbbbpbpppppbbbb
+pppppppbbbpbppbptppbptpbpbbbpbptbbpttpppppbb
+bbpppbpbbbbppppppbpbtppbpbpbbtbbpbppp
+btbppbbttbbbbtbbbbbbbpptppbbpbbbpbbbpbbbppppbppbbbpbtppp
+btbptpbtbppbppbbtbbbbpbtpbppppbpbbppppb
+`
+.replace(/\s/g,'')
+.toLowerCase();
+
+function analyze(){
+
+    let pattern = document
+        .getElementById("pattern")
+        .value
+        .toLowerCase()
+        .replace(/[^bpt]/g,'');
+
+    if(pattern.length < 7){
+        alert("Nhập tối thiểu 7 ký tự");
+        return;
+    }
+
+    let found = false;
+
+    for(let len = pattern.length; len >= 7; len--){
+
+        let search = pattern.slice(-len);
+
+        let nextResults = [];
+
+        for(let i=0;i<DATABASE.length-len;i++){
+
+            let part = DATABASE.substring(i,i+len);
+
+            if(part === search){
+
+                let nextChar =
+                    DATABASE[i+len];
+
+                if(nextChar)
+                    nextResults.push(nextChar);
+            }
+        }
+
+        if(nextResults.length){
+
+            found = true;
+
+            let b =
+            nextResults.filter(x=>x==="b").length;
+
+            let p =
+            nextResults.filter(x=>x==="p").length;
+
+            let t =
+            nextResults.filter(x=>x==="t").length;
+
+            let result="B";
+            let max=b;
+
+            if(p>max){
+                max=p;
+                result="P";
+            }
+
+            if(t>max){
+                max=t;
+                result="T";
+            }
+
+            let confidence=
+            ((max/nextResults.length)*100)
+            .toFixed(1);
+
+            document
+            .getElementById("result")
+            .innerHTML=
+            `
+            <div class="success">
+            TRÙNG CHUỖI KẾT QUẢ LÀ
+            </div>
+
+            <div class="big">
+            ${result}
+            </div>
+
+            <hr>
+
+            <b>Chuỗi khớp:</b> ${search}<br>
+            <b>Độ dài:</b> ${len}<br>
+            <b>Số lần xuất hiện:</b> ${nextResults.length}<br><br>
+
+            B = ${b}<br>
+            P = ${p}<br>
+            T = ${t}<br><br>
+
+            <b>Độ tin cậy:</b>
+            ${confidence}%<br><br>
+
+            <b>Các kết quả sau chuỗi:</b><br>
+            ${nextResults.join(" ")}
+            `;
+
+            return;
+        }
+    }
+
+    let recent =
+    DATABASE.slice(-40);
+
+    let b =
+    (recent.match(/b/g)||[]).length;
+
+    let p =
+    (recent.match(/p/g)||[]).length;
+
+    let t =
+    (recent.match(/t/g)||[]).length;
+
+    let result = "B";
+
+    if(p>b)
+        result="P";
+
+    if(t>b && t>p)
+        result="T";
+
+    let confidence = 55;
+
+    let diff =
+    Math.abs(b-p);
+
+    if(diff>=3)
+        confidence+=5;
+
+    if(diff>=6)
+        confidence+=5;
+
+    if(diff>=10)
+        confidence+=5;
+
+    document
+    .getElementById("result")
+    .innerHTML=
+    `
+    <div class="ai">
+    AI PHÂN TÍCH KẾT QUẢ LÀ
+    </div>
+
+    <div class="big">
+    ${result}
+    </div>
+
+    <hr>
+
+    Không tìm thấy chuỗi trùng từ
+    ${pattern.length} → 7 ký tự.<br><br>
+
+    B = ${b}<br>
+    P = ${p}<br>
+    T = ${t}<br><br>
+
+    <b>Độ tin cậy:</b>
+    ${confidence}%
+    `;
+}
+</script>
+
+</body>
+</html>
