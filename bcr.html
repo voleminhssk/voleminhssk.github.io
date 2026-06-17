@@ -329,6 +329,34 @@
       };
     }
 
+    function exactContinuation(seq, maxOrder = 5){
+      for (let order = Math.min(maxOrder, seq.length - 1); order >= 1; order--) {
+        const ctx = seq.slice(seq.length - order).join('');
+        const countsNext = {B:0,P:0,T:0};
+        let support = 0;
+        for (let i = order; i < seq.length; i++) {
+          const window = seq.slice(i - order, i).join('');
+          if (window === ctx) {
+            countsNext[seq[i]]++;
+            support++;
+          }
+        }
+        if (support > 0) {
+          const total = countsNext.B + countsNext.P + countsNext.T;
+          return {
+            order,
+            context: ctx,
+            support,
+            B: countsNext.B / total,
+            P: countsNext.P / total,
+            T: countsNext.T / total,
+            raw: countsNext
+          };
+        }
+      }
+      return null;
+    }
+
     function entropy(seq, windowSize = null){
       const slice = windowSize ? seq.slice(Math.max(0, seq.length - windowSize)) : seq;
       if (!slice.length) return 0;
@@ -503,13 +531,17 @@
         `;
       }
 
+      const exact = exactContinuation(seq, 5);
+      const exactLabel = exact ? (exact.B >= exact.P && exact.B >= exact.T ? 'B' : exact.P >= exact.B && exact.P >= exact.T ? 'P' : 'T') : null;
       const bestOverall = topClass(prob);
       const bestMarkov = total ? topClass(markov1) : 'B';
       const bestLabel = bestOverall === 'B' ? 'cái (B)' : bestOverall === 'P' ? 'con (P)' : 'hòa (T)';
       const markovLabel = bestMarkov === 'B' ? 'cái (B)' : bestMarkov === 'P' ? 'con (P)' : 'hòa (T)';
       const summary = document.getElementById('summary');
       summary.innerHTML = total
-        ? `Phân tích hoàn tất. Dữ liệu hiện tại cho thấy <strong>${bestLabel}</strong> đang chiếm ưu thế tổng thể, còn lớp Markov theo ván cuối nghiêng về <strong>${markovLabel}</strong>. Mức tin cậy ước lượng: <strong>${confidence}</strong>.`
+        ? (exact
+            ? `Phân tích hoàn tất. Khớp ngữ cảnh đuôi dài nhất bậc <strong>${exact.order}</strong> với chuỗi <strong>${exact.context}</strong> (xuất hiện <strong>${exact.support}</strong> lần). Phân bố tiếp theo là B ${Math.round(exact.B*100)}%, P ${Math.round(exact.P*100)}%, T ${Math.round(exact.T*100)}%. Mức tin cậy theo số mẫu: <strong>${confidence}</strong>.`
+            : `Phân tích hoàn tất nhưng chưa có ngữ cảnh đuôi nào khớp trong dữ liệu đã nhập. Mức tin cậy theo số mẫu: <strong>${confidence}</strong>.`)
         : 'Hãy nhập chuỗi rồi bấm Phân tích hoặc nhấn các nút B/P/T để thêm nhanh.';
     }
 
