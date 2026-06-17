@@ -1,190 +1,526 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<title>🔥 Baccarat PRNG Predictor PRO</title>
-
-<style>
-body{
-    margin:0;
-    font-family:Arial;
-    background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-    color:#fff;
-    text-align:center;
-}
-
-.container{
-    padding:20px;
-}
-
-h1{
-    color:#00ffd5;
-}
-
-.box{
-    background:#00000055;
-    padding:20px;
-    border-radius:10px;
-    display:inline-block;
-}
-
-input{
-    padding:12px;
-    margin:8px;
-    border:none;
-    border-radius:5px;
-    width:140px;
-    text-align:center;
-    font-size:16px;
-}
-
-button{
-    padding:12px 25px;
-    border:none;
-    border-radius:5px;
-    background:#00ffd5;
-    color:#000;
-    font-weight:bold;
-    cursor:pointer;
-}
-
-.result{
-    margin-top:20px;
-    font-size:20px;
-}
-
-.strong{
-    color:#00ff88;
-    font-size:24px;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Baccarat Multi-layer Analyzer</title>
+  <style>
+    :root{
+      --bg:#07111f;
+      --panel:#0f1a2f;
+      --panel2:#13213a;
+      --line:rgba(255,255,255,.08);
+      --text:#eef4ff;
+      --muted:#9fb0d0;
+      --b:#ff6b6b;
+      --p:#52a8ff;
+      --t:#ffd166;
+      --good:#57d58d;
+      --warn:#ffb703;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:radial-gradient(circle at top,#12264f 0%,var(--bg) 58%);
+      color:var(--text);
+      min-height:100vh;
+    }
+    .wrap{max-width:1360px;margin:0 auto;padding:22px}
+    .hero{
+      background:linear-gradient(135deg,rgba(122,168,255,.14),rgba(87,213,141,.10));
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:22px;
+      box-shadow:0 24px 70px rgba(0,0,0,.28);
+      margin-bottom:16px;
+    }
+    h1{margin:0 0 8px;font-size:clamp(28px,4vw,42px)}
+    .sub{margin:0;color:var(--muted);line-height:1.6}
+    .grid{display:grid;grid-template-columns:1.06fr .94fr;gap:16px}
+    .card{
+      background:rgba(15,26,47,.95);
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:18px;
+      box-shadow:0 16px 40px rgba(0,0,0,.18);
+    }
+    .card h2{margin:0 0 14px;font-size:18px}
+    textarea{
+      width:100%;
+      min-height:140px;
+      resize:vertical;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:var(--panel2);
+      color:var(--text);
+      padding:14px;
+      font-size:16px;
+      outline:none;
+      line-height:1.7;
+    }
+    textarea:focus{border-color:rgba(122,168,255,.5);box-shadow:0 0 0 3px rgba(122,168,255,.12)}
+    .quickbar{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+    button{
+      border:0;
+      border-radius:14px;
+      padding:12px 16px;
+      cursor:pointer;
+      font-weight:800;
+      color:#09101f;
+      transition:transform .08s ease,opacity .12s ease;
+    }
+    button:active{transform:translateY(1px)}
+    .btn-b{background:linear-gradient(135deg,#ff7d7d,#ff5252)}
+    .btn-p{background:linear-gradient(135deg,#67c7ff,#3f8cff)}
+    .btn-t{background:linear-gradient(135deg,#ffe08a,#ffbf47)}
+    .btn-primary{background:linear-gradient(135deg,#7aa8ff,#52d58d)}
+    .btn-ghost{background:#e9effa}
+    .btn-danger{background:linear-gradient(135deg,#ff9c9c,#ff6b6b)}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .chip{
+      width:36px;height:36px;border-radius:999px;display:grid;place-items:center;
+      font-weight:900;color:#09101f;box-shadow:0 8px 18px rgba(0,0,0,.18);user-select:none
+    }
+    .chip.b{background:linear-gradient(135deg,#ff7d7d,#ff5252)}
+    .chip.p{background:linear-gradient(135deg,#67c7ff,#3f8cff)}
+    .chip.t{background:linear-gradient(135deg,#ffe08a,#ffbf47)}
+    .pills{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+    .pill{background:linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.03));border:1px solid var(--line);border-radius:18px;padding:14px}
+    .pill .big{font-size:28px;font-weight:900}
+    .pill .name{color:var(--muted);font-size:13px;margin-top:4px}
+    .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+    .stat{
+      background:var(--panel2);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:14px;
+    }
+    .label{font-size:13px;color:var(--muted);margin-bottom:6px}
+    .value{font-size:26px;font-weight:900}
+    .tiny{font-size:12px;color:var(--muted);line-height:1.5}
+    .bars{margin-top:12px;display:grid;gap:10px}
+    .row{display:grid;grid-template-columns:52px 1fr 72px;gap:10px;align-items:center}
+    .track{height:14px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden}
+    .fill{height:100%;border-radius:999px}
+    .bar-b{background:linear-gradient(135deg,#ff7d7d,#ff5252)}
+    .bar-p{background:linear-gradient(135deg,#67c7ff,#3f8cff)}
+    .bar-t{background:linear-gradient(135deg,#ffe08a,#ffbf47)}
+    .note{margin-top:12px;background:rgba(122,168,255,.09);border:1px solid rgba(122,168,255,.18);border-radius:16px;padding:12px 14px;line-height:1.65}
+    .analysis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+    .box{background:var(--panel2);border:1px solid var(--line);border-radius:18px;padding:14px;min-height:140px}
+    .box h3{margin:0 0 10px;font-size:16px}
+    .box ul{margin:0;padding-left:18px;line-height:1.7;color:var(--text)}
+    .box li{margin:4px 0}
+    .box table{width:100%;border-collapse:collapse;color:var(--text);font-size:13px}
+    .box th,.box td{border-bottom:1px solid rgba(255,255,255,.08);padding:6px 4px;text-align:left}
+    .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+    canvas{width:100%;height:280px;background:var(--panel2);border:1px solid var(--line);border-radius:18px;margin-top:14px}
+    .footer-note{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.6}
+    @media (max-width: 1060px){.grid{grid-template-columns:1fr}.analysis{grid-template-columns:1fr}.stats,.pills,.grid3{grid-template-columns:1fr 1fr}}
+    @media (max-width: 560px){.stats,.pills,.grid3{grid-template-columns:1fr}.row{grid-template-columns:42px 1fr 56px} button{width:100%}}
+  </style>
 </head>
-
 <body>
+  <div class="wrap">
+    <div class="hero">
+      <h1>Baccarat Multi-layer Analyzer</h1>
+      <p class="sub">Nhập chuỗi kết quả B, P, T bằng nút bấm hoặc dán chuỗi vào ô nhập. Tool phân tích toàn bộ dữ liệu đã nhập theo nhiều lớp: tổng cái, tổng con, tổng hòa, chuỗi bệt, đổi cầu, N-gram, Markov bậc 1–5 và entropy.</p>
+    </div>
 
-<div class="container">
-<h1>🤖 BACCARAT AI PRNG PRO</h1>
+    <div class="grid">
+      <section class="card">
+        <h2>Nhập nhanh</h2>
+        <textarea id="input" placeholder="Ví dụ: B B P T P B B B P ... hoặc BBBPTPBBBP"></textarea>
+        <div class="quickbar">
+          <button class="btn-b" onclick="addSymbol('B')">+ B</button>
+          <button class="btn-p" onclick="addSymbol('P')">+ P</button>
+          <button class="btn-t" onclick="addSymbol('T')">+ T</button>
+          <button class="btn-primary" onclick="analyze()">Phân tích</button>
+          <button class="btn-ghost" onclick="fillSample()">Nạp ví dụ</button>
+          <button class="btn-danger" onclick="clearAll()">Xóa</button>
+        </div>
 
-<div class="box">
-    <p>Nhập tổng điểm</p>
-    <input id="player" placeholder="Tổng CON (Player)">
-    <input id="banker" placeholder="Tổng CÁI (Banker)">
-    <br>
-    <button onclick="analyze()">PHÂN TÍCH</button>
-</div>
+        <div class="chips" id="chips"></div>
+        <canvas id="chart" width="1000" height="320"></canvas>
 
-<div class="result" id="result"></div>
+        <div class="note" id="summary">Hãy nhập chuỗi rồi bấm Phân tích hoặc nhấn các nút B/P/T để thêm nhanh.</div>
+      </section>
 
-</div>
+      <section class="card">
+        <h2>Ô tổng lớn</h2>
+        <div class="pills">
+          <div class="pill"><div class="big" id="pillB">0</div><div class="name">Tổng cái (B)</div></div>
+          <div class="pill"><div class="big" id="pillP">0</div><div class="name">Tổng con (P)</div></div>
+          <div class="pill"><div class="big" id="pillT">0</div><div class="name">Tổng hòa (T)</div></div>
+        </div>
 
-<script>
+        <div class="stats">
+          <div class="stat"><div class="label">Tổng ván</div><div class="value" id="total">0</div></div>
+          <div class="stat"><div class="label">Chuỗi hiện tại</div><div class="value" id="streak">-</div></div>
+          <div class="stat"><div class="label">Đổi cầu B/P</div><div class="value" id="switches">0</div></div>
+          <div class="stat"><div class="label">Shoe 416 lá còn lại</div><div class="value" id="remaining">416</div><div class="tiny">Ước lượng theo giả định shoe 8 bộ</div></div>
+          <div class="stat"><div class="label">Đã dùng</div><div class="value" id="usedCards">0</div><div class="tiny">Mỗi ký tự nhập được tính là 1 mốc dữ liệu</div></div>
+          <div class="stat"><div class="label">Lớp tin cậy</div><div class="value" id="confidence">-</div><div class="tiny">Dựa trên số mẫu đã nhập</div></div>
+        </div>
 
-// ====== PCG RANDOM ======
-let seed = Date.now();
+        <div class="bars">
+          <div class="row"><div>B</div><div class="track"><div class="fill bar-b" id="barB" style="width:0%"></div></div><div id="pctB">0%</div></div>
+          <div class="row"><div>P</div><div class="track"><div class="fill bar-p" id="barP" style="width:0%"></div></div><div id="pctP">0%</div></div>
+          <div class="row"><div>T</div><div class="track"><div class="fill bar-t" id="barT" style="width:0%"></div></div><div id="pctT">0%</div></div>
+        </div>
 
-function pcg(){
-    seed = (seed * 1664525 + 1013904223) % 4294967296;
-    return seed / 4294967296;
-}
+        <div class="analysis">
+          <div class="box">
+            <h3>Phân tích chuỗi</h3>
+            <ul id="patternList"><li>Chưa có dữ liệu.</li></ul>
+          </div>
+          <div class="box">
+            <h3>Phân tích nhiều lớp</h3>
+            <ul id="layerList"><li>Chưa có dữ liệu.</li></ul>
+          </div>
+        </div>
 
-// ====== MERSENNE TWISTER (simple version) ======
-class MT {
-    constructor(seed){
-        this.mt = new Array(624);
-        this.index = 0;
-        this.mt[0] = seed;
+        <div class="grid3">
+          <div class="box">
+            <h3>Markov bậc 1–5</h3>
+            <div id="markovBox" class="tiny">Chưa có dữ liệu.</div>
+          </div>
+          <div class="box">
+            <h3>N-gram Analyzer</h3>
+            <div id="ngramBox" class="tiny">Chưa có dữ liệu.</div>
+          </div>
+          <div class="box">
+            <h3>Entropy Analyzer</h3>
+            <div id="entropyBox" class="tiny">Chưa có dữ liệu.</div>
+          </div>
+        </div>
 
-        for(let i=1;i<624;i++){
-            this.mt[i] = (1812433253 * (this.mt[i-1] ^ (this.mt[i-1] >> 30)) + i);
-        }
+        <div class="footer-note">
+          Công cụ này chỉ phân tích dữ liệu đã nhập và các mẫu thống kê; không có cách nào bảo đảm dự đoán chính xác tuyệt đối.
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const input = document.getElementById('input');
+    const canvas = document.getElementById('chart');
+    const ctx = canvas.getContext('2d');
+    const SHOE_SIZE = 416;
+    const SYMBOLS = ['B','P','T'];
+
+    function normalizeSequence(text){
+      const upper = (text || '').toUpperCase();
+      const arr = [];
+      for (const ch of upper) if (ch === 'B' || ch === 'P' || ch === 'T') arr.push(ch);
+      return arr;
     }
 
-    extract(){
-        if(this.index === 0){
-            this.generate();
-        }
+    function setInputFromSeq(seq){ input.value = seq.join(' '); }
 
-        let y = this.mt[this.index];
-        y ^= y >> 11;
-        y ^= (y << 7) & 2636928640;
-        y ^= (y << 15) & 4022730752;
-        y ^= y >> 18;
-
-        this.index = (this.index + 1) % 624;
-        return y / 4294967296;
+    function addSymbol(symbol){
+      const seq = normalizeSequence(input.value);
+      seq.push(symbol);
+      setInputFromSeq(seq);
+      analyze();
     }
 
-    generate(){
-        for(let i=0;i<624;i++){
-            let y = (this.mt[i] & 0x80000000) + (this.mt[(i+1)%624] & 0x7fffffff);
-            this.mt[i] = this.mt[(i+397)%624] ^ (y >> 1);
-
-            if(y % 2 !== 0){
-                this.mt[i] ^= 2567483615;
-            }
-        }
-    }
-}
-
-let mt = new MT(Date.now());
-
-// ====== MONTE CARLO ======
-function simulate(player, banker, runs=100000){
-    let pWin=0, bWin=0, tie=0;
-
-    for(let i=0;i<runs;i++){
-
-        // mix PRNG
-        let r1 = pcg();
-        let r2 = mt.extract();
-
-        let pScore = (player + Math.floor(r1*10)) % 10;
-        let bScore = (banker + Math.floor(r2*10)) % 10;
-
-        if(pScore > bScore) pWin++;
-        else if(bScore > pScore) bWin++;
-        else tie++;
+    function fillSample(){
+      input.value = 'B B B P P T B P P P B B T B B P P B T T B P B B B P P';
+      analyze();
     }
 
-    return {
-        p:(pWin/runs*100).toFixed(2),
-        b:(bWin/runs*100).toFixed(2),
-        t:(tie/runs*100).toFixed(2)
-    };
-}
+    function clearAll(){ input.value = ''; render([]); }
 
-// ====== MAIN ======
-function analyze(){
-    let player = parseInt(document.getElementById("player").value);
-    let banker = parseInt(document.getElementById("banker").value);
+    function counts(seq){ const c = {B:0,P:0,T:0}; seq.forEach(x => c[x]++); return c; }
 
-    if(isNaN(player) || isNaN(banker)){
-        alert("Nhập đủ tổng Con và Cái!");
+    function streakInfo(seq){
+      if (!seq.length) return {label:'-', len:0};
+      const last = seq[seq.length - 1];
+      let len = 1;
+      for (let i = seq.length - 2; i >= 0; i--) { if (seq[i] === last) len++; else break; }
+      return {label:last, len};
+    }
+
+    function switchCount(seq){
+      let n = 0;
+      for (let i=1;i<seq.length;i++) if ((seq[i-1] === 'B' && seq[i] === 'P') || (seq[i-1] === 'P' && seq[i] === 'B')) n++;
+      return n;
+    }
+
+    function runLengths(seq){
+      if (!seq.length) return [];
+      const runs = [];
+      let cur = seq[0], len = 1;
+      for (let i=1;i<seq.length;i++) {
+        if (seq[i] === cur) len++;
+        else { runs.push({k:cur, len}); cur = seq[i]; len = 1; }
+      }
+      runs.push({k:cur, len});
+      return runs;
+    }
+
+    function transitions(seq){
+      const map = {B:{B:0,P:0,T:0}, P:{B:0,P:0,T:0}, T:{B:0,P:0,T:0}};
+      for (let i=1;i<seq.length;i++) map[seq[i-1]][seq[i]]++;
+      return map;
+    }
+
+    function windowStats(seq, size){
+      const slice = seq.slice(Math.max(0, seq.length - size));
+      const c = counts(slice);
+      const total = slice.length || 1;
+      return { size: slice.length, b: Math.round((c.B/total)*100), p: Math.round((c.P/total)*100), t: Math.round((c.T/total)*100) };
+    }
+
+    function probability(seq){
+      const c = counts(seq);
+      const total = seq.length;
+      const alpha = 1;
+      const denom = total + 3*alpha;
+      return { B:(c.B + alpha)/denom, P:(c.P + alpha)/denom, T:(c.T + alpha)/denom };
+    }
+
+    function predictByMarkov(seq){
+      const trans = transitions(seq);
+      const last = seq[seq.length - 1];
+      const row = last ? trans[last] : {B:0,P:0,T:0};
+      const sum = row.B + row.P + row.T;
+      if (!sum) return probability(seq);
+      const alpha = 1;
+      const denom = sum + 3*alpha;
+      return { B:(row.B + alpha)/denom, P:(row.P + alpha)/denom, T:(row.T + alpha)/denom };
+    }
+
+    function topClass(obj){ return Object.entries(obj).sort((a,b)=>b[1]-a[1])[0][0]; }
+
+    function buildNgrams(seq, n){
+      const map = new Map();
+      for (let i = 0; i <= seq.length - n; i++) {
+        const k = seq.slice(i, i + n).join('');
+        map.set(k, (map.get(k) || 0) + 1);
+      }
+      return [...map.entries()].sort((a,b)=>b[1]-a[1]);
+    }
+
+    function markovOrder(seq, order){
+      const states = ['B','P','T'];
+      const result = {};
+      if (seq.length <= order) return null;
+      for (const s of states) result[s] = {B:0,P:0,T:0};
+      for (let i = order; i < seq.length; i++) {
+        const key = seq.slice(i - order, i).join('');
+        const next = seq[i];
+        if (!result[key]) result[key] = {B:0,P:0,T:0};
+        result[key][next]++;
+      }
+      const lastCtx = seq.slice(seq.length - order).join('');
+      const row = result[lastCtx];
+      if (!row) return null;
+      const sum = row.B + row.P + row.T;
+      if (!sum) return null;
+      return {
+        context: lastCtx,
+        B: row.B / sum,
+        P: row.P / sum,
+        T: row.T / sum,
+        raw: row
+      };
+    }
+
+    function entropy(seq, windowSize = null){
+      const slice = windowSize ? seq.slice(Math.max(0, seq.length - windowSize)) : seq;
+      if (!slice.length) return 0;
+      const c = counts(slice);
+      const total = slice.length;
+      let h = 0;
+      for (const k of SYMBOLS) {
+        const p = c[k] / total;
+        if (p > 0) h -= p * Math.log2(p);
+      }
+      return h;
+    }
+
+    function entropyLevel(h){
+      if (h < 0.7) return 'rất thấp';
+      if (h < 1.2) return 'thấp';
+      if (h < 1.45) return 'trung bình';
+      if (h < 1.55) return 'khá cao';
+      return 'cao';
+    }
+
+    function renderChips(seq){
+      const chips = document.getElementById('chips');
+      chips.innerHTML = '';
+      seq.forEach(v => {
+        const d = document.createElement('div');
+        d.className = `chip ${v.toLowerCase()}`;
+        d.textContent = v;
+        chips.appendChild(d);
+      });
+    }
+
+    function drawChart(seq){
+      const w = canvas.width, h = canvas.height;
+      ctx.clearRect(0,0,w,h);
+      ctx.fillStyle = '#13213a';
+      ctx.fillRect(0,0,w,h);
+      ctx.strokeStyle = 'rgba(255,255,255,.08)';
+      for (let i=1;i<6;i++) { const y = (h/6)*i; ctx.beginPath(); ctx.moveTo(20,y); ctx.lineTo(w-20,y); ctx.stroke(); }
+      if (!seq.length) {
+        ctx.fillStyle = 'rgba(255,255,255,.65)';
+        ctx.font = '600 18px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Chưa có dữ liệu để vẽ biểu đồ', w/2, h/2);
         return;
+      }
+      const yMap = {B:90, P:180, T:270};
+      const cMap = {B:'#ff5e5e', P:'#49a4ff', T:'#ffcc4d'};
+      const startX = 38;
+      const gap = Math.max(24, Math.min(48, (w - 80) / Math.max(1, seq.length - 1)));
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = 'rgba(255,255,255,.22)';
+      ctx.beginPath();
+      seq.forEach((v, i) => { const x = startX + i*gap; const y = yMap[v]; if (i === 0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
+      ctx.stroke();
+      seq.forEach((v, i) => {
+        const x = startX + i*gap, y = yMap[v];
+        ctx.beginPath(); ctx.fillStyle = cMap[v]; ctx.arc(x,y,8,0,Math.PI*2); ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+      });
+      ctx.font = '600 14px Inter, sans-serif'; ctx.textAlign = 'left';
+      let lx = 24;
+      [['B','Cái',cMap.B],['P','Con',cMap.P],['T','Hòa',cMap.T]].forEach(([k, label, c]) => {
+        ctx.fillStyle = c; ctx.fillRect(lx, 18, 12, 12); ctx.fillStyle = '#eef4ff'; ctx.fillText(`${k} = ${label}`, lx + 18, 29); lx += 120;
+      });
     }
 
-    let res = simulate(player, banker, 100000);
+    function render(seq){
+      renderChips(seq);
+      drawChart(seq);
 
-    let prediction = "";
-    let confidence = Math.abs(res.p - res.b);
+      const total = seq.length;
+      const c = counts(seq);
+      const st = streakInfo(seq);
+      const sw = switchCount(seq);
+      const pct = { B: total ? c.B / total : 0, P: total ? c.P / total : 0, T: total ? c.T / total : 0 };
+      const remaining = Math.max(0, SHOE_SIZE - total);
+      const confidence = total < 8 ? 'thấp' : total < 25 ? 'trung bình' : total < 60 ? 'khá' : 'cao';
+      document.getElementById('total').textContent = total;
+      document.getElementById('streak').textContent = total ? `${st.label} × ${st.len}` : '-';
+      document.getElementById('switches').textContent = sw;
+      document.getElementById('remaining').textContent = remaining;
+      document.getElementById('usedCards').textContent = total;
+      document.getElementById('confidence').textContent = confidence;
+      document.getElementById('pillB').textContent = c.B;
+      document.getElementById('pillP').textContent = c.P;
+      document.getElementById('pillT').textContent = c.T;
+      document.getElementById('barB').style.width = `${pct.B*100}%`;
+      document.getElementById('barP').style.width = `${pct.P*100}%`;
+      document.getElementById('barT').style.width = `${pct.T*100}%`;
+      document.getElementById('pctB').textContent = `${Math.round(pct.B*100)}%`;
+      document.getElementById('pctP').textContent = `${Math.round(pct.P*100)}%`;
+      document.getElementById('pctT').textContent = `${Math.round(pct.T*100)}%`;
 
-    if(res.p > res.b){
-        prediction = "PLAYER";
-    }else{
-        prediction = "BANKER";
+      const patternList = document.getElementById('patternList');
+      const layerList = document.getElementById('layerList');
+      const markovBox = document.getElementById('markovBox');
+      const ngramBox = document.getElementById('ngramBox');
+      const entropyBox = document.getElementById('entropyBox');
+      const runs = runLengths(seq);
+      const longest = runs.length ? runs.reduce((a,b)=> a.len >= b.len ? a : b) : null;
+      const trans = transitions(seq);
+      const prob = probability(seq);
+      const markov1 = predictByMarkov(seq);
+      const recent10 = windowStats(seq, 10);
+      const recent20 = windowStats(seq, 20);
+      const recent50 = windowStats(seq, 50);
+
+      if (!total) {
+        patternList.innerHTML = '<li>Chưa có dữ liệu.</li>';
+        layerList.innerHTML = '<li>Chưa có dữ liệu.</li>';
+        markovBox.textContent = 'Chưa có dữ liệu.';
+        ngramBox.textContent = 'Chưa có dữ liệu.';
+        entropyBox.textContent = 'Chưa có dữ liệu.';
+      } else {
+        const top = topClass(c);
+        const topName = top === 'B' ? 'Tổng cái (B)' : top === 'P' ? 'Tổng con (P)' : 'Tổng hòa (T)';
+        const markovTop = topClass(markov1);
+        const markovName = markovTop === 'B' ? 'B' : markovTop === 'P' ? 'P' : 'T';
+
+        patternList.innerHTML = `
+          <li>Kết quả xuất hiện nhiều nhất: <strong>${topName}</strong>.</li>
+          <li>Chuỗi hiện tại: <strong>${st.label} × ${st.len}</strong>.</li>
+          <li>Chuỗi dài nhất: <strong>${longest ? longest.k + ' × ' + longest.len : '-'}</strong>.</li>
+          <li>Số lần đổi giữa B và P: <strong>${sw}</strong>.</li>
+          <li>Đoạn gần nhất 10 ván: B ${recent10.b}%, P ${recent10.p}%, T ${recent10.t}%.</li>
+        `;
+
+        layerList.innerHTML = `
+          <li>Tổng toàn bộ: B ${Math.round(prob.B*100)}%, P ${Math.round(prob.P*100)}%, T ${Math.round(prob.T*100)}%.</li>
+          <li>Mô hình Markov theo ván cuối: nghiêng về <strong>${markovName}</strong> (${Math.round(markov1[markovTop]*100)}%).</li>
+          <li>Cửa sổ 20 ván gần nhất: B ${recent20.b}%, P ${recent20.p}%, T ${recent20.t}%.</li>
+          <li>Cửa sổ 50 ván gần nhất: B ${recent50.b}%, P ${recent50.p}%, T ${recent50.t}%.</li>
+          <li>Chuyển tiếp quan sát được: B→P ${trans.B.P}, P→B ${trans.P.B}, B→B ${trans.B.B}, P→P ${trans.P.P}.</li>
+          <li>Ước lượng shoe 8 bộ: đã nhập ${total} / 416 lá, còn ${remaining} lá.</li>
+        `;
+
+        const orders = [1,2,3,4,5];
+        const markovHtml = orders.map(order => {
+          const m = order === 1 ? null : markovOrder(seq, order);
+          if (order === 1) {
+            const best = topClass(markov1);
+            return `<tr><td>1</td><td>ctx cuối 1</td><td>${Math.round(markov1.B*100)}% / ${Math.round(markov1.P*100)}% / ${Math.round(markov1.T*100)}%</td><td>${best}</td></tr>`;
+          }
+          if (!m) return `<tr><td>${order}</td><td>không đủ mẫu</td><td>-</td><td>-</td></tr>`;
+          const best = topClass(m);
+          return `<tr><td>${order}</td><td>${m.context}</td><td>${Math.round(m.B*100)}% / ${Math.round(m.P*100)}% / ${Math.round(m.T*100)}%</td><td>${best}</td></tr>`;
+        }).join('');
+        markovBox.innerHTML = `
+          <table>
+            <thead><tr><th>Bậc</th><th>Ngữ cảnh</th><th>P(B/P/T)</th><th>Top</th></tr></thead>
+            <tbody>${markovHtml}</tbody>
+          </table>
+        `;
+
+        const ngramRows = [2,3,4,5].map(n => {
+          const grams = buildNgrams(seq, n).slice(0, 4);
+          const text = grams.length ? grams.map(([k,v]) => `${k}:${v}`).join(', ') : 'Không đủ mẫu';
+          return `<li><strong>${n}-gram:</strong> ${text}</li>`;
+        }).join('');
+        ngramBox.innerHTML = `<ul>${ngramRows}</ul>`;
+
+        const hAll = entropy(seq);
+        const h10 = entropy(seq, 10);
+        const h20 = entropy(seq, 20);
+        entropyBox.innerHTML = `
+          <ul>
+            <li>Entropy toàn bộ: <strong>${hAll.toFixed(3)}</strong> (${entropyLevel(hAll)})</li>
+            <li>Entropy 10 ván gần nhất: <strong>${h10.toFixed(3)}</strong> (${entropyLevel(h10)})</li>
+            <li>Entropy 20 ván gần nhất: <strong>${h20.toFixed(3)}</strong> (${entropyLevel(h20)})</li>
+            <li>Ý nghĩa: entropy thấp = chuỗi lặp rõ hơn, entropy cao = chuỗi biến động nhiều hơn.</li>
+          </ul>
+        `;
+      }
+
+      const bestOverall = topClass(prob);
+      const bestMarkov = total ? topClass(markov1) : 'B';
+      const bestLabel = bestOverall === 'B' ? 'cái (B)' : bestOverall === 'P' ? 'con (P)' : 'hòa (T)';
+      const markovLabel = bestMarkov === 'B' ? 'cái (B)' : bestMarkov === 'P' ? 'con (P)' : 'hòa (T)';
+      const summary = document.getElementById('summary');
+      summary.innerHTML = total
+        ? `Phân tích hoàn tất. Dữ liệu hiện tại cho thấy <strong>${bestLabel}</strong> đang chiếm ưu thế tổng thể, còn lớp Markov theo ván cuối nghiêng về <strong>${markovLabel}</strong>. Mức tin cậy ước lượng: <strong>${confidence}</strong>.`
+        : 'Hãy nhập chuỗi rồi bấm Phân tích hoặc nhấn các nút B/P/T để thêm nhanh.';
     }
 
-    document.getElementById("result").innerHTML = `
-        Player: ${res.p}%<br>
-        Banker: ${res.b}%<br>
-        Tie: ${res.t}%<br><br>
+    function analyze(){
+      const seq = normalizeSequence(input.value);
+      setInputFromSeq(seq);
+      render(seq);
+    }
 
-        <div class="strong">👉 Dự đoán: ${prediction}</div>
-        🔥 Độ tin cậy: ${confidence.toFixed(2)}%
-    `;
-}
-
-</script>
-
+    input.addEventListener('input', analyze);
+    analyze();
+  </script>
 </body>
 </html>
