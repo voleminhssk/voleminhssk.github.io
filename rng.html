@@ -95,8 +95,14 @@ button:hover{
 
 <div class="panel">
 
-<label>Số ván mô phỏng</label>
-<input id="rounds" type="number" value="10000">
+<label>Tổng Banker</label>
+<input id="bankerInput" type="number" value="0">
+
+<label>Tổng Player</label>
+<input id="playerInput" type="number" value="0">
+
+<label>Tổng Tie</label>
+<input id="tieInput" type="number" value="0">
 
 <button onclick="runSimulation()">
 Bắt đầu mô phỏng
@@ -156,9 +162,10 @@ function shuffle(arr){
 
     for(let i=arr.length-1;i>0;i--){
 
-        const j=Math.floor(Math.random()*(i+1));
-
-        [arr[i],arr[j]]=[arr[j],arr[i]];
+        const j =
+    Math.floor(
+        random()*(i+1)
+    );
     }
 }
 
@@ -330,6 +337,78 @@ function simulate(rounds){
         player,
         tie
     };
+}
+    function analyzeTrend(){
+
+    const b = parseInt(document.getElementById("bankerInput").value)||0;
+    const p = parseInt(document.getElementById("playerInput").value)||0;
+    const t = parseInt(document.getElementById("tieInput").value)||0;
+
+    const total = b+p+t;
+
+    if(total===0){
+        return null;
+    }
+
+    const bankerPct = b/total;
+    const playerPct = p/total;
+    const tiePct = t/total;
+
+    const expected = {
+        banker:0.4586,
+        player:0.4462,
+        tie:0.0952
+    };
+
+    let scoreB = expected.banker - bankerPct;
+    let scoreP = expected.player - playerPct;
+    let scoreT = expected.tie - tiePct;
+
+    let predictions = [
+        {
+            result:"BANKER",
+            score:scoreB
+        },
+        {
+            result:"PLAYER",
+            score:scoreP
+        },
+        {
+            result:"TIE",
+            score:scoreT
+        }
+    ];
+
+    predictions.sort((a,b)=>b.score-a.score);
+
+    return predictions;
+}
+
+    const pred = analyzeTrend();
+
+if(pred){
+
+output.innerHTML += `
+
+===== PHÂN TÍCH =====
+
+1. ${pred[0].result}
+
+2. ${pred[1].result}
+
+3. ${pred[2].result}
+`;
+}
+    let seed = 123456789;
+
+function random(){
+
+    seed =
+        (1664525 * seed +
+         1013904223)
+         % 4294967296;
+
+    return seed / 4294967296;
 }
 
 function runSimulation(){
