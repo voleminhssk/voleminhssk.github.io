@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Baccarat Simulator 8 Deck</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#0b1220;
+    color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
+    padding:20px;
+}
+
+.container{
+    max-width:1000px;
+    margin:auto;
+}
+
+h1{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.panel{
+    background:#182235;
+    padding:20px;
+    border-radius:12px;
+    margin-bottom:20px;
+}
+
+label{
+    display:block;
+    margin-bottom:6px;
+}
+
+input{
+    width:100%;
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    margin-bottom:15px;
+}
+
+button{
+    background:#16a34a;
+    color:white;
+    border:none;
+    padding:12px 20px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+    margin-top:20px;
+}
+
+.card{
+    background:#24324a;
+    padding:15px;
+    border-radius:10px;
+    text-align:center;
+}
+
+.big{
+    font-size:28px;
+    font-weight:bold;
+}
+
+.result{
+    margin-top:20px;
+    white-space:pre-wrap;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>Baccarat 8 Deck Simulator</h1>
+
+<div class="panel">
+
+<label>Số ván mô phỏng</label>
+<input id="rounds" type="number" value="10000">
+
+<button onclick="runSimulation()">
+Bắt đầu mô phỏng
+</button>
+
+<div class="stats">
+
+<div class="card">
+<div>Banker</div>
+<div class="big" id="bankerCount">0</div>
+</div>
+
+<div class="card">
+<div>Player</div>
+<div class="big" id="playerCount">0</div>
+</div>
+
+<div class="card">
+<div>Tie</div>
+<div class="big" id="tieCount">0</div>
+</div>
+
+</div>
+
+<div class="result" id="output"></div>
+
+</div>
+
+</div>
+
+<script>
+
+function createShoe(){
+
+    const shoe=[];
+
+    for(let deck=0;deck<8;deck++){
+
+        for(let suit=0;suit<4;suit++){
+
+            for(let rank=1;rank<=13;rank++){
+
+                shoe.push(rank);
+
+            }
+
+        }
+
+    }
+
+    shuffle(shoe);
+
+    return shoe;
+}
+
+function shuffle(arr){
+
+    for(let i=arr.length-1;i>0;i--){
+
+        const j=Math.floor(Math.random()*(i+1));
+
+        [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+}
+
+function baccaratValue(card){
+
+    if(card>=10) return 0;
+
+    return card;
+}
+
+function handTotal(cards){
+
+    let sum=0;
+
+    for(const c of cards){
+
+        sum+=baccaratValue(c);
+    }
+
+    return sum%10;
+}
+
+function playHand(shoe){
+
+    if(shoe.length<6){
+
+        return null;
+    }
+
+    const player=[
+        shoe.pop(),
+        shoe.pop()
+    ];
+
+    const banker=[
+        shoe.pop(),
+        shoe.pop()
+    ];
+
+    let pTotal=handTotal(player);
+    let bTotal=handTotal(banker);
+
+    if(
+        pTotal>=8 ||
+        bTotal>=8
+    ){
+
+        return resultOf(
+            pTotal,
+            bTotal
+        );
+    }
+
+    let playerThird=null;
+
+    if(pTotal<=5){
+
+        playerThird=shoe.pop();
+
+        player.push(playerThird);
+
+        pTotal=handTotal(player);
+    }
+
+    if(playerThird===null){
+
+        if(bTotal<=5){
+
+            banker.push(
+                shoe.pop()
+            );
+
+            bTotal=handTotal(banker);
+        }
+
+    }else{
+
+        const pt=baccaratValue(playerThird);
+
+        let draw=false;
+
+        switch(bTotal){
+
+            case 0:
+            case 1:
+            case 2:
+                draw=true;
+                break;
+
+            case 3:
+                draw=pt!==8;
+                break;
+
+            case 4:
+                draw=pt>=2 && pt<=7;
+                break;
+
+            case 5:
+                draw=pt>=4 && pt<=7;
+                break;
+
+            case 6:
+                draw=pt===6 || pt===7;
+                break;
+
+            default:
+                draw=false;
+        }
+
+        if(draw){
+
+            banker.push(
+                shoe.pop()
+            );
+
+            bTotal=handTotal(banker);
+        }
+    }
+
+    return resultOf(
+        pTotal,
+        bTotal
+    );
+}
+
+function resultOf(player,banker){
+
+    if(player>banker)
+        return "PLAYER";
+
+    if(banker>player)
+        return "BANKER";
+
+    return "TIE";
+}
+
+function simulate(rounds){
+
+    let banker=0;
+    let player=0;
+    let tie=0;
+
+    let shoe=createShoe();
+
+    for(let i=0;i<rounds;i++){
+
+        if(shoe.length<20){
+
+            shoe=createShoe();
+        }
+
+        const result=
+            playHand(shoe);
+
+        if(!result) continue;
+
+        if(result==="BANKER")
+            banker++;
+
+        else if(result==="PLAYER")
+            player++;
+
+        else
+            tie++;
+    }
+
+    return {
+        banker,
+        player,
+        tie
+    };
+}
+
+function runSimulation(){
+
+    const rounds=
+        parseInt(
+            document.getElementById(
+                "rounds"
+            ).value
+        );
+
+    const result=
+        simulate(rounds);
+
+    document.getElementById(
+        "bankerCount"
+    ).textContent=result.banker;
+
+    document.getElementById(
+        "playerCount"
+    ).textContent=result.player;
+
+    document.getElementById(
+        "tieCount"
+    ).textContent=result.tie;
+
+    const total=
+        result.banker+
+        result.player+
+        result.tie;
+
+    const bankerPct=
+        (
+            result.banker/
+            total*100
+        ).toFixed(2);
+
+    const playerPct=
+        (
+            result.player/
+            total*100
+        ).toFixed(2);
+
+    const tiePct=
+        (
+            result.tie/
+            total*100
+        ).toFixed(2);
+
+    document.getElementById(
+        "output"
+    ).innerHTML=
+`
+Tổng số ván: ${total}
+
+BANKER:
+${result.banker}
+(${bankerPct}%)
+
+PLAYER:
+${result.player}
+(${playerPct}%)
+
+TIE:
+${result.tie}
+(${tiePct}%)
+`;
+}
+
+</script>
+
+</body>
+</html>
