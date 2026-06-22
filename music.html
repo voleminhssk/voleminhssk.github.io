@@ -8,8 +8,6 @@
     :root {
       --bg: radial-gradient(circle at top, #1b2558 0%, #0b1020 48%, #060914 100%);
       --bg-overlay: linear-gradient(135deg, rgba(124, 92, 255, 0.18), rgba(0, 212, 255, 0.12));
-      --card: rgba(10, 15, 30, 0.68);
-      --card-strong: rgba(18, 24, 48, 0.82);
       --text: #f5f8ff;
       --muted: rgba(245, 248, 255, 0.72);
       --line: rgba(255, 255, 255, 0.12);
@@ -19,7 +17,6 @@
       --warning: #ffca5c;
       --shadow: 0 20px 70px rgba(0, 0, 0, 0.38);
       --radius: 28px;
-      --radius-sm: 18px;
       --bg-shift-x: 0px;
       --bg-shift-y: 0px;
     }
@@ -71,13 +68,11 @@
       max-width: 1320px;
       margin: 0 auto;
       padding: 24px;
-      transition: transform 80ms ease, filter 80ms ease;
     }
 
     .app.playing-shake {
       animation: shake 260ms ease-in-out infinite alternate;
     }
-
     @keyframes shake {
       0% { transform: translate3d(0, 0, 0) rotate(0deg); }
       25% { transform: translate3d(1px, -1px, 0) rotate(-0.06deg); }
@@ -86,17 +81,21 @@
       100% { transform: translate3d(-1px, -1px, 0) rotate(0.04deg); }
     }
 
+    .topbar, .panel {
+      background: rgba(8, 12, 24, 0.58);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
     .topbar {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
       padding: 18px 20px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      backdrop-filter: blur(18px);
-      box-shadow: var(--shadow);
     }
 
     .brand {
@@ -176,23 +175,10 @@
       align-items: start;
     }
 
-    .panel {
-      background: rgba(8, 12, 24, 0.58);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      backdrop-filter: blur(18px);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-
-    .hero {
-      padding: 24px;
-      position: relative;
-      min-height: 420px;
-      background:
-        radial-gradient(circle at 20% 20%, rgba(124, 92, 255, 0.34), transparent 30%),
-        radial-gradient(circle at 85% 35%, rgba(0, 212, 255, 0.18), transparent 26%),
-        linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+    .hero { padding: 24px; min-height: 420px; background:
+      radial-gradient(circle at 20% 20%, rgba(124, 92, 255, 0.34), transparent 30%),
+      radial-gradient(circle at 85% 35%, rgba(0, 212, 255, 0.18), transparent 26%),
+      linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
     }
 
     .hero-header {
@@ -229,209 +215,59 @@
       place-items: center;
       overflow: hidden;
       position: relative;
-      transition: transform 120ms ease, filter 120ms ease;
+      transition: transform 120ms ease;
     }
-    .art::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(255,255,255,0.12), transparent 50%);
-    }
-    .art::after {
-      content: "";
-      position: absolute;
-      inset: 14px;
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,0.26);
-      backdrop-filter: blur(4px);
-    }
+    .art::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,0.12), transparent 50%); }
+    .art::after { content: ""; position: absolute; inset: 14px; border-radius: 22px; border: 1px solid rgba(255,255,255,0.26); backdrop-filter: blur(4px); }
+
     .vinyl {
-      width: 122px;
-      height: 122px;
-      border-radius: 50%;
+      width: 122px; height: 122px; border-radius: 50%;
       background: radial-gradient(circle at center, #111 0 16%, #343434 17% 33%, #111 34% 44%, #000 45% 100%);
       box-shadow: inset 0 0 0 8px rgba(255,255,255,0.05);
       animation: spin 9s linear infinite paused;
-      position: relative;
-      z-index: 1;
+      position: relative; z-index: 1;
     }
     .vinyl.playing { animation-play-state: running; }
-    .vinyl::before {
-      content: "";
-      position: absolute;
-      inset: 42% auto auto 42%;
-      width: 16px; height: 16px;
-      border-radius: 50%;
-      background: white;
-    }
-
+    .vinyl::before { content: ""; position: absolute; inset: 42% auto auto 42%; width: 16px; height: 16px; border-radius: 50%; background: white; }
     @keyframes spin { from { transform: rotate(0deg);} to { transform: rotate(360deg);} }
 
     .track-meta h3 { margin: 0 0 6px; font-size: 1.2rem; }
     .track-meta .artist { color: var(--muted); margin-bottom: 18px; }
 
-    .progress-wrap {
-      display: grid;
-      gap: 10px;
-      margin-top: 6px;
-    }
+    .progress-wrap { display: grid; gap: 10px; margin-top: 6px; }
+    .bar { width: 100%; height: 12px; border-radius: 999px; background: rgba(255,255,255,0.08); overflow: hidden; cursor: pointer; border: 1px solid rgba(255,255,255,0.08); }
+    .fill { width: 0%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width 80ms linear; }
+    .time-row { display: flex; justify-content: space-between; color: var(--muted); font-size: 0.92rem; }
 
-    .bar {
-      width: 100%;
-      height: 12px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.08);
-      overflow: hidden;
-      cursor: pointer;
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-    .fill {
-      width: 0%;
-      height: 100%;
-      border-radius: inherit;
-      background: linear-gradient(90deg, var(--accent), var(--accent-2));
-      transition: width 80ms linear;
-    }
-    .time-row {
-      display: flex;
-      justify-content: space-between;
-      color: var(--muted);
-      font-size: 0.92rem;
-    }
-
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 18px;
-      align-items: center;
-    }
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; align-items: center; }
     .controls button { padding: 12px 14px; }
+    .slider { display: flex; align-items: center; gap: 10px; margin-left: auto; min-width: 220px; flex: 1 1 220px; }
+    input[type="range"] { width: 100%; accent-color: var(--accent-2); }
 
-    .slider {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-left: auto;
-      min-width: 220px;
-      flex: 1 1 220px;
-    }
+    .wave-wrap { margin-top: 20px; padding: 16px; border-radius: 22px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); }
+    .wave-head { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 12px; color: var(--muted); font-size: 0.92rem; }
+    .wave { height: 92px; display: flex; align-items: end; gap: 3px; overflow: hidden; }
+    .bar-wave { flex: 1 1 0; height: 12px; min-height: 12px; border-radius: 999px; background: linear-gradient(180deg, rgba(124,92,255,0.95), rgba(0,212,255,0.92)); transform-origin: bottom; opacity: 0.9; transition: height 80ms linear, opacity 120ms ease; }
+    .wave.paused .bar-wave { opacity: 0.35; filter: saturate(0.6); }
 
-    input[type="range"] {
-      width: 100%;
-      accent-color: var(--accent-2);
-    }
-
-    .wave-wrap {
-      margin-top: 20px;
-      padding: 16px;
-      border-radius: 22px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-
-    .wave-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 12px;
-      color: var(--muted);
-      font-size: 0.92rem;
-    }
-
-    .wave {
-      height: 92px;
-      display: flex;
-      align-items: end;
-      gap: 3px;
-      overflow: hidden;
-    }
-
-    .bar-wave {
-      flex: 1 1 0;
-      height: 12px;
-      min-height: 12px;
-      border-radius: 999px;
-      background: linear-gradient(180deg, rgba(124,92,255,0.95), rgba(0,212,255,0.92));
-      transform-origin: bottom;
-      opacity: 0.9;
-      transition: height 80ms linear, opacity 120ms ease;
-    }
-
-    .wave.paused .bar-wave {
-      opacity: 0.35;
-      filter: saturate(0.6);
-    }
-
-    .sidebar {
-      padding: 20px;
-    }
-
-    .upload-box {
-      padding: 18px;
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 22px;
-      background: rgba(255,255,255,0.04);
-      margin-bottom: 16px;
-    }
-
-    .upload-box h3 {
-      margin: 0 0 8px;
-      font-size: 1.05rem;
-    }
-    .upload-box p {
-      margin: 0 0 14px;
-      color: var(--muted);
-      line-height: 1.6;
-    }
+    .sidebar { padding: 20px; }
+    .upload-box { padding: 18px; border: 1px solid rgba(255,255,255,0.12); border-radius: 22px; background: rgba(255,255,255,0.04); margin-bottom: 16px; }
+    .upload-box h3 { margin: 0 0 8px; font-size: 1.05rem; }
+    .upload-box p { margin: 0 0 14px; color: var(--muted); line-height: 1.6; }
     .upload-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-
+    .status { margin: 0 0 14px; color: var(--warning); font-size: 0.92rem; line-height: 1.5; min-height: 1.4em; }
     input[type="file"] { display: none; }
 
-    .playlist {
-      display: grid;
-      gap: 10px;
-      max-height: 520px;
-      overflow: auto;
-      padding-right: 4px;
-    }
-
-    .song {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
-      border-radius: 18px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.08);
-      cursor: pointer;
-      transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
-    }
+    .playlist { display: grid; gap: 10px; max-height: 520px; overflow: auto; padding-right: 4px; }
+    .song { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 18px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); cursor: pointer; transition: transform 180ms ease, background 180ms ease, border-color 180ms ease; }
     .song:hover { transform: translateY(-1px); background: rgba(255,255,255,0.08); }
     .song.active { border-color: rgba(0, 212, 255, 0.45); background: rgba(0, 212, 255, 0.12); }
-    .song .dot {
-      width: 12px; height: 12px; border-radius: 50%; background: var(--accent-2); flex: 0 0 auto;
-      box-shadow: 0 0 0 6px rgba(0,212,255,0.12);
-    }
+    .song .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--accent-2); flex: 0 0 auto; box-shadow: 0 0 0 6px rgba(0,212,255,0.12); }
     .song .info { min-width: 0; flex: 1; }
     .song .info strong, .song .info span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .song .info span { color: var(--muted); font-size: 0.9rem; margin-top: 2px; }
-    .badge {
-      padding: 7px 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.08);
-      font-size: 0.8rem;
-      color: var(--muted);
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-
-    .footer-note {
-      margin-top: 16px;
-      color: var(--muted);
-      font-size: 0.92rem;
-      line-height: 1.55;
-    }
+    .badge { padding: 7px 10px; border-radius: 999px; background: rgba(255,255,255,0.08); font-size: 0.8rem; color: var(--muted); border: 1px solid rgba(255,255,255,0.08); }
+    .footer-note { margin-top: 16px; color: var(--muted); font-size: 0.92rem; line-height: 1.55; }
 
     .focus-mode {
       --bg: radial-gradient(circle at top, #10253f 0%, #08111f 44%, #04070c 100%);
@@ -439,19 +275,11 @@
       --accent: #45a3ff;
       --accent-2: #39d98a;
     }
-    .focus-mode .orb.one,
-    .focus-mode .orb.two,
-    .focus-mode .orb.three { opacity: 0.12; }
-    .focus-mode .upload-box { border-color: rgba(69,163,255,0.22); }
-    .focus-mode .bar-wave {
-      background: linear-gradient(180deg, rgba(69,163,255,0.95), rgba(57,217,138,0.92));
-    }
+    .focus-mode .orb.one, .focus-mode .orb.two, .focus-mode .orb.three { opacity: 0.12; }
+    .focus-mode .bar-wave { background: linear-gradient(180deg, rgba(69,163,255,0.95), rgba(57,217,138,0.92)); }
 
     .pulse { animation: pulse 1.6s ease-in-out infinite; }
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(0,212,255,0.12); }
-      50% { box-shadow: 0 0 0 16px rgba(0,212,255,0); }
-    }
+    @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(0,212,255,0.12); } 50% { box-shadow: 0 0 0 16px rgba(0,212,255,0); } }
 
     @media (max-width: 1040px) {
       .grid { grid-template-columns: 1fr; }
@@ -484,27 +312,21 @@
     <header class="topbar">
       <div class="brand">
         <div class="logo" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <path d="M12 3a1 1 0 0 1 1 1v8.17a3.001 3.001 0 1 1-2-2.829V4a1 1 0 0 1 1-1Zm6 1a1 1 0 0 1 1 1v10.17a3.001 3.001 0 1 1-2-2.829V5a1 1 0 0 1 1-1Z"/>
-          </svg>
+          <svg viewBox="0 0 24 24"><path d="M12 3a1 1 0 0 1 1 1v8.17a3.001 3.001 0 1 1-2-2.829V4a1 1 0 0 1 1-1Zm6 1a1 1 0 0 1 1 1v10.17a3.001 3.001 0 1 1-2-2.829V5a1 1 0 0 1 1-1Z"/></svg>
         </div>
         <div>
           <h1>Remix Zone</h1>
-          <p>Nghe remix đẹp, mượt, hỗ trợ upload tạm thời và nền động.</p>
+          <p>Nghe remix đẹp, hỗ trợ upload tạm thời và đọc nhạc từ host bằng JSON.</p>
         </div>
       </div>
 
       <div class="actions">
         <button id="focusBtn" class="ghost">
-          <span class="icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4Zm0 2a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H7Z"/></svg>
-          </span>
+          <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4Zm0 2a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H7Z"/></svg></span>
           <span>Chế độ tập trung học</span>
         </button>
         <label class="file-label primary" for="fileInput">
-          <span class="icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M12 3a1 1 0 0 1 1 1v6.59l1.3-1.3a1 1 0 1 1 1.4 1.42l-3.01 3a1 1 0 0 1-1.4 0l-3.01-3a1 1 0 1 1 1.4-1.42L11 10.59V4a1 1 0 0 1 1-1Zm-7 12a1 1 0 0 1 1 1v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2a1 1 0 1 1 2 0v2a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-2a1 1 0 0 1 1-1Z"/></svg>
-          </span>
+          <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3a1 1 0 0 1 1 1v6.59l1.3-1.3a1 1 0 1 1 1.4 1.42l-3.01 3a1 1 0 0 1-1.4 0l-3.01-3a1 1 0 1 1 1.4-1.42L11 10.59V4a1 1 0 0 1 1-1Zm-7 12a1 1 0 0 1 1 1v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2a1 1 0 1 1 2 0v2a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-2a1 1 0 0 1 1-1Z"/></svg></span>
           <span>Tải nhạc tạm thời</span>
         </label>
         <input id="fileInput" type="file" accept="audio/*" multiple />
@@ -516,92 +338,54 @@
         <div class="hero-header">
           <div>
             <h2>Nghe remix chất, giao diện sang, sóng nhạc chạy theo bài.</h2>
-            <p>
-              Người dùng có thể tải file audio tạm thời ngay trên trình duyệt. Khi phát nhạc, sóng âm chuyển động,
-              nền rung nhẹ, và giao diện tự co giãn tốt trên máy tính lẫn điện thoại.
-            </p>
+            <p>Web này có thể đọc danh sách từ <strong>tracks.json</strong> trên host. Người dùng cũng có thể upload audio tạm thời ngay trên trình duyệt.</p>
           </div>
           <span class="badge" id="trackCount">0 bài nhạc</span>
         </div>
 
         <div class="now-playing">
-          <div class="art" id="artBox">
-            <div class="vinyl" id="vinyl"></div>
-          </div>
+          <div class="art" id="artBox"><div class="vinyl" id="vinyl"></div></div>
 
           <div class="track-meta">
             <h3 id="trackTitle">Chưa có bài hát</h3>
-            <div class="artist" id="trackArtist">Tải file audio lên để bắt đầu phát.</div>
+            <div class="artist" id="trackArtist">Đang tải danh sách từ host...</div>
 
             <div class="progress-wrap">
-              <div class="bar" id="progressBar" aria-label="Thanh tiến trình">
-                <div class="fill" id="progressFill"></div>
-              </div>
-              <div class="time-row">
-                <span id="currentTime">00:00</span>
-                <span id="duration">00:00</span>
-              </div>
+              <div class="bar" id="progressBar" aria-label="Thanh tiến trình"><div class="fill" id="progressFill"></div></div>
+              <div class="time-row"><span id="currentTime">00:00</span><span id="duration">00:00</span></div>
             </div>
 
             <div class="controls">
-              <button id="prevBtn">
-                <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 5a1 1 0 0 1 1.6-.8l8 6a1 1 0 0 1 0 1.6l-8 6A1 1 0 0 1 6 17V5Zm11 0a1 1 0 1 1 2 0v12a1 1 0 1 1-2 0V5Z"/></svg></span>
-                <span>Bài trước</span>
-              </button>
-              <button id="playBtn" class="primary pulse">
-                <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.55.83l10-6.5a1 1 0 0 0 0-1.66l-10-6.5A1 1 0 0 0 8 5.5Z"/></svg></span>
-                <span>Phát</span>
-              </button>
-              <button id="nextBtn">
-                <span>Bài sau</span>
-                <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 5a1 1 0 0 1 1 1v12a1 1 0 1 1-2 0V6a1 1 0 0 1 1-1ZM5.4 5.2A1 1 0 0 1 7 6v12a1 1 0 0 1-1.6.8l-8-6a1 1 0 0 1 0-1.6l8-6Z"/></svg></span>
-              </button>
-              <button id="shuffleBtn">
-                <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 3a1 1 0 0 1 1 1v2.59l1.3-1.3a1 1 0 1 1 1.4 1.42L17.41 9l2.29 2.29a1 1 0 0 1-1.4 1.42L17 11.41V14a1 1 0 1 1-2 0V4a1 1 0 0 1 1-1ZM3 7a1 1 0 0 1 1-1h4.5a4 4 0 0 1 3.3 1.73l4.76 6.84a2 2 0 0 0 1.64.86H21a1 1 0 1 1 0 2h-3.8a4 4 0 0 1-3.3-1.73L9.14 8.86A2 2 0 0 0 7.5 8H4a1 1 0 0 1-1-1Zm0 10a1 1 0 0 1 1-1h3.5a2 2 0 0 0 1.64-.86l.81-1.16a1 1 0 0 1 1.64 1.16l-.81 1.16A4 4 0 0 1 7.5 18H4a1 1 0 0 1-1-1Z"/></svg></span>
-                <span>Ngẫu nhiên</span>
-              </button>
-              <div class="slider">
-                <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4a1 1 0 0 1 1 1v14a1 1 0 1 1-2 0V5a1 1 0 0 1 1-1Zm-5 4a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0V9a1 1 0 0 1 1-1Zm10 2a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0v-2a1 1 0 0 1 1-1Z"/></svg></span>
-                <input id="volume" type="range" min="0" max="1" step="0.01" value="0.85" />
-              </div>
+              <button id="prevBtn"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 5a1 1 0 0 1 1.6-.8l8 6a1 1 0 0 1 0 1.6l-8 6A1 1 0 0 1 6 17V5Zm11 0a1 1 0 1 1 2 0v12a1 1 0 1 1-2 0V5Z"/></svg></span><span>Bài trước</span></button>
+              <button id="playBtn" class="primary pulse"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.55.83l10-6.5a1 1 0 0 0 0-1.66l-10-6.5A1 1 0 0 0 8 5.5Z"/></svg></span><span>Phát</span></button>
+              <button id="nextBtn"><span>Bài sau</span><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 5a1 1 0 0 1 1 1v12a1 1 0 1 1-2 0V6a1 1 0 0 1 1-1ZM5.4 5.2A1 1 0 0 1 7 6v12a1 1 0 0 1-1.6.8l-8-6a1 1 0 0 1 0-1.6l8-6Z"/></svg></span></button>
+              <button id="shuffleBtn"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 3a1 1 0 0 1 1 1v2.59l1.3-1.3a1 1 0 1 1 1.4 1.42L17.41 9l2.29 2.29a1 1 0 0 1-1.4 1.42L17 11.41V14a1 1 0 1 1-2 0V4a1 1 0 0 1 1-1ZM3 7a1 1 0 0 1 1-1h4.5a4 4 0 0 1 3.3 1.73l4.76 6.84a2 2 0 0 0 1.64.86H21a1 1 0 1 1 0 2h-3.8a4 4 0 0 1-3.3-1.73L9.14 8.86A2 2 0 0 0 7.5 8H4a1 1 0 0 1-1-1Zm0 10a1 1 0 0 1 1-1h3.5a2 2 0 0 0 1.64-.86l.81-1.16a1 1 0 0 1 1.64 1.16l-.81 1.16A4 4 0 0 1 7.5 18H4a1 1 0 0 1-1-1Z"/></svg></span><span>Ngẫu nhiên</span></button>
+              <div class="slider"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4a1 1 0 0 1 1 1v14a1 1 0 1 1-2 0V5a1 1 0 0 1 1-1Zm-5 4a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0V9a1 1 0 0 1 1-1Zm10 2a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0v-2a1 1 0 0 1 1-1Z"/></svg></span><input id="volume" type="range" min="0" max="1" step="0.01" value="0.85" /></div>
             </div>
 
             <div class="wave-wrap">
-              <div class="wave-head">
-                <span>Sóng âm</span>
-                <span id="waveState">Sẵn sàng</span>
-              </div>
+              <div class="wave-head"><span>Sóng âm</span><span id="waveState">Sẵn sàng</span></div>
               <div class="wave paused" id="wave" aria-hidden="true"></div>
             </div>
           </div>
         </div>
 
-        <audio id="audio" crossorigin="anonymous"></audio>
+        <audio id="audio" playsinline crossorigin="anonymous"></audio>
       </main>
 
       <aside class="panel sidebar">
         <div class="upload-box">
-          <h3>Danh sách nhạc tạm thời</h3>
-          <p>
-            Người dùng có thể upload file audio trực tiếp từ điện thoại hoặc máy tính. Danh sách này chỉ lưu tạm trong tab hiện tại.
-          </p>
+          <h3>Danh sách nhạc</h3>
+          <p>Web sẽ tự đọc <strong>tracks.json</strong> trên host. Người dùng cũng có thể upload file audio tạm thời từ máy tính hoặc điện thoại.</p>
+          <div id="statusText" class="status">Đang thử tải tracks.json...</div>
           <div class="upload-actions">
-            <button id="clearBtn">
-              <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 3a1 1 0 0 0-1 1v1H5a1 1 0 0 0 0 2h1.2l.9 12.2A2 2 0 0 0 9.1 21h5.8a2 2 0 0 0 2-1.8L17.8 7H19a1 1 0 1 0 0-2h-3V4a1 1 0 0 0-1-1H9Zm1 2h4v0h-4Zm-1.1 4h6.2l-.9 11H9.8l-.9-11Z"/></svg></span>
-              <span>Xóa danh sách</span>
-            </button>
-            <button id="demoBtn" class="good">
-              <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5a1 1 0 0 1 1.45-.89l8 4a1 1 0 0 1 0 1.78l-8 4A1 1 0 0 1 9 13V5Zm-4 1a1 1 0 1 1 2 0v12a1 1 0 1 1-2 0V6Z"/></svg></span>
-              <span>Thêm demo</span>
-            </button>
+            <button id="clearBtn"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 3a1 1 0 0 0-1 1v1H5a1 1 0 0 0 0 2h1.2l.9 12.2A2 2 0 0 0 9.1 21h5.8a2 2 0 0 0 2-1.8L17.8 7H19a1 1 0 1 0 0-2h-3V4a1 1 0 0 0-1-1H9Zm1 2h4v0h-4Zm-1.1 4h6.2l-.9 11H9.8l-.9-11Z"/></svg></span><span>Xóa danh sách</span></button>
+            <button id="demoBtn" class="good"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 5a1 1 0 0 1 1.45-.89l8 4a1 1 0 0 1 0 1.78l-8 4A1 1 0 0 1 9 13V5Zm-4 1a1 1 0 1 1 2 0v12a1 1 0 1 1-2 0V6Z"/></svg></span><span>Thêm demo</span></button>
           </div>
         </div>
 
         <div class="playlist" id="playlist"></div>
-
-        <div class="footer-note">
-          Giao diện này phù hợp cho website tĩnh. File audio upload tạm thời sẽ không cần server xử lý.
-        </div>
+        <div class="footer-note">Nếu mở bằng file máy tính (file://) thì fetch JSON có thể bị chặn. Hãy chạy trên host hoặc localhost.</div>
       </aside>
     </section>
   </div>
@@ -612,6 +396,7 @@
     const trackTitle = document.getElementById('trackTitle');
     const trackArtist = document.getElementById('trackArtist');
     const trackCount = document.getElementById('trackCount');
+    const statusText = document.getElementById('statusText');
     const audio = document.getElementById('audio');
     const playBtn = document.getElementById('playBtn');
     const prevBtn = document.getElementById('prevBtn');
@@ -648,8 +433,8 @@
     let freqData = null;
     let waveBars = [];
     let visualizerRunning = false;
-    let shakeEnabled = false;
-    let objectUrls = new Set();
+    let motionRunning = false;
+    let usingHost = false;
 
     function formatTime(sec) {
       if (!Number.isFinite(sec)) return '00:00';
@@ -665,41 +450,9 @@
       for (let i = 0; i < count; i++) {
         const bar = document.createElement('div');
         bar.className = 'bar-wave';
-        bar.style.height = '12px';
         wave.appendChild(bar);
         waveBars.push(bar);
       }
-    }
-
-    function setupAudioGraph() {
-      if (audioCtx) return;
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContextClass) return;
-      audioCtx = new AudioContextClass();
-      analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 256;
-      freqData = new Uint8Array(analyser.frequencyBinCount);
-
-      try {
-        sourceNode = audioCtx.createMediaElementSource(audio);
-        sourceNode.connect(analyser);
-        analyser.connect(audioCtx.destination);
-      } catch (e) {
-        console.warn('Không thể tạo audio graph:', e);
-      }
-    }
-
-    function animateWave() {
-      if (!analyser || !freqData || !waveBars.length) return;
-      analyser.getByteFrequencyData(freqData);
-      const usable = Math.min(waveBars.length, freqData.length);
-      for (let i = 0; i < usable; i++) {
-        const value = freqData[Math.floor(i * freqData.length / usable)] || 0;
-        const height = 12 + (value / 255) * (wave.clientHeight - 18);
-        waveBars[i].style.height = `${Math.max(10, height)}px`;
-        waveBars[i].style.opacity = `${0.45 + (value / 255) * 0.55}`;
-      }
-      if (visualizerRunning) requestAnimationFrame(animateWave);
     }
 
     function setBackground(index = null) {
@@ -713,7 +466,7 @@
     function setNowPlaying(track) {
       if (!track) {
         trackTitle.textContent = 'Chưa có bài hát';
-        trackArtist.textContent = 'Tải file audio lên để bắt đầu phát.';
+        trackArtist.textContent = usingHost ? 'Không có bài hợp lệ trong tracks.json.' : 'Tải file audio lên để bắt đầu phát.';
         return;
       }
       trackTitle.textContent = track.name;
@@ -725,7 +478,7 @@
       trackCount.textContent = `${tracks.length} bài nhạc`;
 
       if (!tracks.length) {
-        playlistEl.innerHTML = '<div class="song"><div class="dot"></div><div class="info"><strong>Chưa có nhạc</strong><span>Tải file audio lên hoặc thêm demo</span></div><span class="badge">0:00</span></div>';
+        playlistEl.innerHTML = '<div class="song"><div class="dot"></div><div class="info"><strong>Chưa có nhạc</strong><span>Kiểm tra tracks.json hoặc tải file lên</span></div><span class="badge">0:00</span></div>';
         setNowPlaying(null);
         return;
       }
@@ -747,6 +500,23 @@
       if (currentIndex >= 0) setNowPlaying(tracks[currentIndex]);
     }
 
+    function setupAudioGraph() {
+      if (audioCtx) return;
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      audioCtx = new AudioContextClass();
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 256;
+      freqData = new Uint8Array(analyser.frequencyBinCount);
+      try {
+        sourceNode = audioCtx.createMediaElementSource(audio);
+        sourceNode.connect(analyser);
+        analyser.connect(audioCtx.destination);
+      } catch (e) {
+        console.warn('Audio graph error:', e);
+      }
+    }
+
     async function ensureAudioReady() {
       setupAudioGraph();
       if (audioCtx && audioCtx.state === 'suspended') {
@@ -754,13 +524,67 @@
       }
     }
 
+    function animateWave() {
+      if (!visualizerRunning) return;
+      if (analyser && freqData && waveBars.length) {
+        analyser.getByteFrequencyData(freqData);
+        const usable = Math.min(waveBars.length, freqData.length);
+        for (let i = 0; i < usable; i++) {
+          const value = freqData[Math.floor(i * freqData.length / usable)] || 0;
+          const height = 12 + (value / 255) * (wave.clientHeight - 18);
+          waveBars[i].style.height = `${Math.max(10, height)}px`;
+          waveBars[i].style.opacity = `${0.45 + (value / 255) * 0.55}`;
+        }
+      } else {
+        waveBars.forEach((bar, i) => {
+          const value = Math.abs(Math.sin(Date.now() / 260 + i * 0.55));
+          const height = 12 + value * (wave.clientHeight - 18);
+          bar.style.height = `${Math.max(10, height)}px`;
+          bar.style.opacity = `${0.45 + value * 0.55}`;
+        });
+      }
+      requestAnimationFrame(animateWave);
+    }
+
+    function startMotion() {
+      motionRunning = true;
+      app.classList.add('playing-shake');
+    }
+
+    function stopMotion() {
+      motionRunning = false;
+      app.classList.remove('playing-shake');
+      document.documentElement.style.setProperty('--bg-shift-x', '0px');
+      document.documentElement.style.setProperty('--bg-shift-y', '0px');
+      artBox.style.transform = 'translate3d(0,0,0)';
+    }
+
+    function updateMotion() {
+      if (!motionRunning || audio.paused) return;
+      const level = analyser && freqData ? ((freqData[6] || 0) / 255) : 0.2;
+      const x = ((Math.random() - 0.5) * (2 + level * 7)).toFixed(2) + 'px';
+      const y = ((Math.random() - 0.5) * (2 + level * 7)).toFixed(2) + 'px';
+      document.documentElement.style.setProperty('--bg-shift-x', x);
+      document.documentElement.style.setProperty('--bg-shift-y', y);
+      artBox.style.transform = `translate3d(${(Math.random() - 0.5) * (1 + level * 2)}px, ${(Math.random() - 0.5) * (1 + level * 2)}px, 0)`;
+      requestAnimationFrame(updateMotion);
+    }
+
     async function playTrack(index) {
       if (!tracks.length) return;
       currentIndex = index;
       const track = tracks[currentIndex];
+      audio.crossOrigin = 'anonymous';
       audio.src = track.url;
+      audio.load();
       await ensureAudioReady();
-      audio.play().catch(() => {});
+      try {
+        await audio.play();
+        statusText.textContent = usingHost ? 'Đã tải nhạc từ host.' : '';
+      } catch (err) {
+        statusText.textContent = 'Không phát được bài này. Kiểm tra đường dẫn trong tracks.json, tên file và quyền truy cập file audio.';
+        console.warn(err);
+      }
       setNowPlaying(track);
       renderPlaylist();
       playBtn.querySelector('span:last-child').textContent = 'Tạm dừng';
@@ -769,35 +593,28 @@
       wave.classList.remove('paused');
       waveState.textContent = 'Đang phát';
       startMotion();
-      startVisualizer();
+      visualizerRunning = true;
+      requestAnimationFrame(animateWave);
+      requestAnimationFrame(updateMotion);
     }
 
     function nextTrack() {
       if (!tracks.length) return;
-      if (shuffled) {
-        const random = Math.floor(Math.random() * tracks.length);
-        playTrack(random);
-        return;
-      }
-      const next = (currentIndex + 1) % tracks.length;
-      playTrack(next);
+      if (shuffled) return playTrack(Math.floor(Math.random() * tracks.length));
+      playTrack((currentIndex + 1) % tracks.length);
     }
 
     function prevTrack() {
       if (!tracks.length) return;
-      const prev = (currentIndex - 1 + tracks.length) % tracks.length;
-      playTrack(prev);
+      playTrack((currentIndex - 1 + tracks.length) % tracks.length);
     }
 
     async function togglePlay() {
       if (!tracks.length) return;
-      if (!audio.src) {
-        await playTrack(currentIndex >= 0 ? currentIndex : 0);
-        return;
-      }
+      if (!audio.src) return playTrack(currentIndex >= 0 ? currentIndex : 0);
       await ensureAudioReady();
       if (audio.paused) {
-        audio.play().catch(() => {});
+        await audio.play().catch(() => {});
       } else {
         audio.pause();
       }
@@ -805,8 +622,7 @@
 
     function updateProgress() {
       if (!audio.duration) return;
-      const percent = (audio.currentTime / audio.duration) * 100;
-      progressFill.style.width = `${percent}%`;
+      progressFill.style.width = `${(audio.currentTime / audio.duration) * 100}%`;
       currentTime.textContent = formatTime(audio.currentTime);
       durationEl.textContent = formatTime(audio.duration);
     }
@@ -815,67 +631,49 @@
       app.classList.toggle('focus-mode');
       const on = app.classList.contains('focus-mode');
       focusBtn.querySelector('span:last-child').textContent = on ? 'Thoát tập trung' : 'Chế độ tập trung học';
-      if (on) {
-        setBackground(2);
-      } else {
-        setBackground(currentBg);
+      setBackground(on ? 2 : currentBg);
+    }
+
+    function normalizeTrack(item, index) {
+      const url = item?.url || item?.src || item?.file;
+      return {
+        name: item?.name || item?.title || `Track ${index + 1}`,
+        artist: item?.artist || 'Host audio',
+        url: typeof url === 'string' ? new URL(url, document.baseURI).href : ''
+      };
+    }
+
+    async function loadTracksFromHost() {
+      statusText.textContent = 'Đang thử tải tracks.json...';
+      usingHost = false;
+      try {
+        const res = await fetch('tracks.json', { cache: 'no-store' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const list = Array.isArray(data) ? data : (Array.isArray(data.tracks) ? data.tracks : []);
+        tracks = list.map(normalizeTrack).filter(t => t.url);
+        currentIndex = tracks.length ? 0 : -1;
+        usingHost = true;
+        statusText.textContent = tracks.length ? 'Đã tải danh sách từ host.' : 'tracks.json không có bài hợp lệ.';
+        renderPlaylist();
+      } catch (e) {
+        statusText.textContent = 'Không đọc được tracks.json. Nếu đang mở file trực tiếp, hãy chạy trên host hoặc localhost. Nếu đã ở host, kiểm tra đường dẫn JSON và link audio.';
+        tracks = [];
+        currentIndex = -1;
+        renderPlaylist();
+        console.warn(e);
       }
-    }
-
-    function startMotion() {
-      shakeEnabled = true;
-      app.classList.add('playing-shake');
-    }
-
-    function stopMotion() {
-      shakeEnabled = false;
-      app.classList.remove('playing-shake');
-      document.documentElement.style.setProperty('--bg-shift-x', '0px');
-      document.documentElement.style.setProperty('--bg-shift-y', '0px');
-    }
-
-    function startVisualizer() {
-      if (!visualizerRunning) {
-        visualizerRunning = true;
-        requestAnimationFrame(animateWave);
-      }
-    }
-
-    function stopVisualizer() {
-      visualizerRunning = false;
-      wave.classList.add('paused');
-      waveState.textContent = 'Tạm dừng';
-    }
-
-    function updateMotionFromAudio() {
-      if (!shakeEnabled || audio.paused) return;
-      const level = analyser && freqData ? (freqData[4] || 0) / 255 : 0.25;
-      const offsetX = ((Math.random() - 0.5) * (2 + level * 6)).toFixed(2) + 'px';
-      const offsetY = ((Math.random() - 0.5) * (2 + level * 6)).toFixed(2) + 'px';
-      document.documentElement.style.setProperty('--bg-shift-x', offsetX);
-      document.documentElement.style.setProperty('--bg-shift-y', offsetY);
-      artBox.style.transform = `translate3d(${(Math.random() - 0.5) * (1 + level * 2)}px, ${(Math.random() - 0.5) * (1 + level * 2)}px, 0)`;
-      if (!audio.paused) requestAnimationFrame(updateMotionFromAudio);
     }
 
     async function loadAudioFile(file) {
       if (!file || !file.type.startsWith('audio/')) return;
       const url = URL.createObjectURL(file);
-      objectUrls.add(url);
-      tracks.push({
-        name: file.name.replace(/\.[^.]+$/, ''),
-        artist: 'Audio tải lên',
-        url
-      });
+      tracks.push({ name: file.name.replace(/\.[^.]+$/, ''), artist: 'Audio tải lên', url });
       if (currentIndex === -1) currentIndex = 0;
+      usingHost = false;
+      statusText.textContent = 'Đã thêm file audio tạm thời.';
       renderPlaylist();
     }
-
-    fileInput.addEventListener('change', async (e) => {
-      const files = Array.from(e.target.files || []);
-      for (const file of files) await loadAudioFile(file);
-      fileInput.value = '';
-    });
 
     playBtn.addEventListener('click', togglePlay);
     prevBtn.addEventListener('click', prevTrack);
@@ -886,10 +684,16 @@
       shuffleBtn.querySelector('span:last-child').textContent = shuffled ? 'Ngẫu nhiên: Bật' : 'Ngẫu nhiên';
     });
     focusBtn.addEventListener('click', toggleFocusMode);
+    fileInput.addEventListener('change', async (e) => {
+      const files = Array.from(e.target.files || []);
+      for (const file of files) await loadAudioFile(file);
+      fileInput.value = '';
+    });
     clearBtn.addEventListener('click', () => {
-      tracks.forEach(t => { try { if (t.url.startsWith('blob:')) URL.revokeObjectURL(t.url); } catch {} });
       tracks = [];
       currentIndex = -1;
+      usingHost = false;
+      statusText.textContent = '';
       audio.pause();
       audio.removeAttribute('src');
       audio.load();
@@ -899,23 +703,23 @@
       setNowPlaying(null);
       renderPlaylist();
       stopMotion();
-      stopVisualizer();
+      visualizerRunning = false;
       vinyl.classList.remove('playing');
+      wave.classList.add('paused');
+      waveState.textContent = 'Sẵn sàng';
       playBtn.querySelector('span:last-child').textContent = 'Phát';
       playBtn.classList.add('pulse');
-      wave.innerHTML = '';
       buildWaveBars();
-      waveState.textContent = 'Sẵn sàng';
     });
-
     demoBtn.addEventListener('click', () => {
-      const demos = [
+      tracks = [
         { name: 'Midnight Drop Remix', artist: 'Demo track', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' },
         { name: 'Neon School Focus', artist: 'Demo track', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3' },
         { name: 'Skyline Bass Edit', artist: 'Demo track', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3' }
       ];
-      tracks = demos;
       currentIndex = 0;
+      usingHost = false;
+      statusText.textContent = 'Đang dùng demo.';
       renderPlaylist();
     });
 
@@ -925,7 +729,6 @@
       const ratio = (e.clientX - rect.left) / rect.width;
       audio.currentTime = Math.min(Math.max(ratio, 0), 1) * audio.duration;
     });
-
     volume.addEventListener('input', () => { audio.volume = volume.value; });
 
     audio.addEventListener('timeupdate', updateProgress);
@@ -938,8 +741,9 @@
       wave.classList.remove('paused');
       waveState.textContent = 'Đang phát';
       startMotion();
-      startVisualizer();
-      requestAnimationFrame(updateMotionFromAudio);
+      visualizerRunning = true;
+      requestAnimationFrame(animateWave);
+      requestAnimationFrame(updateMotion);
     });
     audio.addEventListener('pause', () => {
       playBtn.querySelector('span:last-child').textContent = 'Phát';
@@ -948,25 +752,10 @@
       wave.classList.add('paused');
       waveState.textContent = 'Tạm dừng';
       stopMotion();
-    });
-    audio.addEventListener('ended', () => {
-      stopMotion();
-      stopVisualizer();
+      visualizerRunning = false;
     });
 
-    window.addEventListener('resize', () => {
-      buildWaveBars();
-    });
-
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden && !audio.paused) {
-        stopMotion();
-      } else if (!audio.paused) {
-        startMotion();
-        requestAnimationFrame(updateMotionFromAudio);
-      }
-    });
-
+    window.addEventListener('resize', buildWaveBars);
     document.addEventListener('keydown', (e) => {
       if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
       if (e.code === 'ArrowRight') nextTrack();
@@ -978,6 +767,7 @@
     setBackground(0);
     buildWaveBars();
     renderPlaylist();
+    loadTracksFromHost();
   </script>
 </body>
 </html>
