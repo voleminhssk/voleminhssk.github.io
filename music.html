@@ -108,12 +108,7 @@
     }
     .brand p { margin: 5px 0 0; color: var(--muted); font-size: 0.95rem; }
 
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: flex-end;
-    }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; }
 
     button, .file-label {
       border: 0;
@@ -161,6 +156,20 @@
         radial-gradient(circle at 20% 20%, rgba(124, 92, 255, 0.34), transparent 30%),
         radial-gradient(circle at 85% 35%, rgba(0, 212, 255, 0.18), transparent 26%),
         linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      position: relative;
+      isolation: isolate;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(120deg, rgba(255,255,255,0.05), transparent 40%),
+        radial-gradient(circle at 70% 20%, rgba(255,255,255,0.05), transparent 18%),
+        radial-gradient(circle at 20% 80%, rgba(255,255,255,0.04), transparent 16%);
+      pointer-events: none;
+      z-index: -1;
     }
 
     .hero-header {
@@ -197,7 +206,7 @@
       place-items: center;
       overflow: hidden;
       position: relative;
-      transition: transform 120ms ease;
+      transition: transform 120ms ease, filter 120ms ease;
     }
     .art::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,0.12), transparent 50%); }
     .art::after { content: ""; position: absolute; inset: 14px; border-radius: 22px; border: 1px solid rgba(255,255,255,0.26); backdrop-filter: blur(4px); }
@@ -265,13 +274,14 @@
     }
     .focus-mode .wave-wrap { background: rgba(255,255,255,0.035); }
     .focus-mode .bar-wave { background: linear-gradient(180deg, rgba(69,163,255,0.95), rgba(57,217,138,0.92)); }
+    .focus-mode .panel, .focus-mode .topbar { border-color: rgba(69,163,255,0.12); }
+    .focus-mode .sidebar .upload-box { background: rgba(255,255,255,0.03); }
 
     .pulse { animation: pulse 1.6s ease-in-out infinite; }
     @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(0,212,255,0.12); } 50% { box-shadow: 0 0 0 16px rgba(0,212,255,0); } }
 
     .toast-wrap { position: fixed; top: 18px; right: 18px; z-index: 50; display: grid; gap: 10px; pointer-events: none; }
     .toast {
-      pointer-events: none;
       min-width: 250px;
       max-width: min(92vw, 380px);
       padding: 14px 16px;
@@ -280,7 +290,7 @@
       border: 1px solid rgba(255,255,255,0.12);
       box-shadow: 0 16px 50px rgba(0, 0, 0, 0.28);
       backdrop-filter: blur(16px);
-      animation: toastIn 220ms ease, toastOut 220ms ease 2.9s forwards;
+      animation: toastIn 220ms ease, toastOut 220ms ease 2.7s forwards;
     }
     .toast strong { display: block; margin-bottom: 4px; }
     .toast span { color: var(--muted); font-size: 0.92rem; line-height: 1.45; }
@@ -321,6 +331,23 @@
     }
     .lock-icon svg { width: 30px; height: 30px; fill: white; }
 
+    .focus-meter {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .focus-chip {
+      padding: 10px 12px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+    .focus-chip strong { display: block; color: var(--text); font-size: 0.95rem; margin-bottom: 2px; }
+
     @media (max-width: 1040px) {
       .grid { grid-template-columns: 1fr; }
       .sidebar { order: 2; }
@@ -341,6 +368,7 @@
       .wave { height: 74px; gap: 2px; }
       .bar-wave { min-height: 10px; }
       .toast-wrap { left: 14px; right: 14px; top: 14px; }
+      .focus-meter { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -356,7 +384,12 @@
         <svg viewBox="0 0 24 24"><path d="M17 10V8a5 5 0 0 0-10 0v2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-1Zm-8 0V8a3 3 0 0 1 6 0v2H9Z"/></svg>
       </div>
       <h3 id="lockTitle">Chế độ học tập đã bật</h3>
-      <p id="lockDesc">Giao diện sẽ yên tĩnh hơn, giảm chi tiết gây xao nhãng và giữ nhạc phát trong phạm vi trình duyệt hỗ trợ.</p>
+      <p id="lockDesc">Giao diện yên tĩnh hơn, hạn chế gây xao nhãng và giữ nhạc phát trong phạm vi trình duyệt hỗ trợ.</p>
+      <div class="focus-meter">
+        <div class="focus-chip"><strong>Focus</strong>Tối giản</div>
+        <div class="focus-chip"><strong>Audio</strong>Đang giữ</div>
+        <div class="focus-chip"><strong>UI</strong>Ít xao nhãng</div>
+      </div>
     </div>
   </div>
 
@@ -409,7 +442,7 @@
             </div>
           </div>
         </div>
-        <audio id="audio" playsinline crossorigin="anonymous"></audio>
+        <audio id="audio" playsinline crossorigin="anonymous" preload="metadata"></audio>
       </main>
 
       <aside class="panel sidebar">
@@ -479,13 +512,15 @@
     let usingHost = false;
     let focusMode = false;
     let keepAwake = null;
+    let focusToastId = null;
+    let hiddenNoticeShown = false;
 
     function toast(title, message, type = 'info') {
       const el = document.createElement('div');
       el.className = `toast ${type}`;
       el.innerHTML = `<strong>${title}</strong><span>${message}</span>`;
       toastWrap.appendChild(el);
-      setTimeout(() => el.remove(), 3300);
+      setTimeout(() => el.remove(), 3000);
     }
 
     function formatTime(sec) {
@@ -632,12 +667,10 @@
     function showFocusUi(on) {
       lockScreen.classList.toggle('show', on);
       lockScreen.setAttribute('aria-hidden', String(!on));
-      focusBtn.querySelector('span:last-child').textContent = on ? 'Thoát tập trung' : 'Chế độ tập trung học';
       lockTitle.textContent = on ? 'Chế độ học tập đã bật' : 'Chế độ học tập đã tắt';
       lockDesc.textContent = on
-        ? 'Giao diện đã chuyển sang chế độ tối giản và yên tĩnh hơn. Nhạc vẫn tiếp tục phát nếu trình duyệt hỗ trợ nền.'
-        : 'Giao diện đã trở lại bình thường. Bạn có thể tiếp tục nghe nhạc và thao tác như trước.';
-      toast(on ? 'Đã bật chế độ học tập' : 'Đã tắt chế độ học tập', on ? 'Giao diện yên tĩnh hơn và ít xao nhãng hơn.' : 'Giao diện đã trở về mặc định.', on ? 'success' : 'info');
+        ? 'Giao diện đã chuyển sang tối giản hơn. Nhạc vẫn tiếp tục phát nếu trình duyệt hỗ trợ phát nền.'
+        : 'Giao diện đã trở lại bình thường. Bạn có thể nghe và thao tác như trước.';
     }
 
     function toggleFocusMode() {
@@ -647,11 +680,16 @@
         setBackground(2);
         showFocusUi(true);
         enableKeepAwake();
+        if (focusToastId) clearTimeout(focusToastId);
+        toast('Đã bật chế độ học tập', 'Giao diện yên tĩnh hơn, ít xao nhãng hơn.', 'success');
       } else {
         setBackground(currentBg);
         showFocusUi(false);
         disableKeepAwake();
+        if (focusToastId) clearTimeout(focusToastId);
+        toast('Đã tắt chế độ học tập', 'Giao diện đã trở về mặc định.', 'info');
       }
+      focusToastId = setTimeout(() => { focusToastId = null; }, 3200);
     }
 
     function normalizeTrack(item, index) {
@@ -686,6 +724,14 @@
       }
     }
 
+    function setAudioUiPlaying(isPlaying) {
+      playBtn.querySelector('span:last-child').textContent = isPlaying ? 'Tạm dừng' : 'Phát';
+      playBtn.classList.toggle('pulse', !isPlaying);
+      vinyl.classList.toggle('playing', isPlaying);
+      wave.classList.toggle('paused', !isPlaying);
+      waveState.textContent = isPlaying ? 'Đang phát' : 'Tạm dừng';
+    }
+
     async function playTrack(index) {
       if (!tracks.length) return;
       currentIndex = index;
@@ -705,11 +751,7 @@
       }
       setNowPlaying(track);
       renderPlaylist();
-      playBtn.querySelector('span:last-child').textContent = 'Tạm dừng';
-      playBtn.classList.remove('pulse');
-      vinyl.classList.add('playing');
-      wave.classList.remove('paused');
-      waveState.textContent = 'Đang phát';
+      setAudioUiPlaying(true);
       startMotion();
       visualizerRunning = true;
       requestAnimationFrame(animateWave);
@@ -786,11 +828,8 @@
       renderPlaylist();
       stopMotion();
       visualizerRunning = false;
-      vinyl.classList.remove('playing');
-      wave.classList.add('paused');
+      setAudioUiPlaying(false);
       waveState.textContent = 'Sẵn sàng';
-      playBtn.querySelector('span:last-child').textContent = 'Phát';
-      playBtn.classList.add('pulse');
       buildWaveBars();
       toast('Đã xóa danh sách', 'Danh sách phát tạm thời đã được làm sạch.', 'info');
     });
@@ -819,32 +858,27 @@
     audio.addEventListener('loadedmetadata', updateProgress);
     audio.addEventListener('ended', nextTrack);
     audio.addEventListener('play', () => {
-      playBtn.querySelector('span:last-child').textContent = 'Tạm dừng';
-      playBtn.classList.remove('pulse');
-      vinyl.classList.add('playing');
-      wave.classList.remove('paused');
-      waveState.textContent = 'Đang phát';
+      setAudioUiPlaying(true);
       startMotion();
       visualizerRunning = true;
       requestAnimationFrame(animateWave);
       requestAnimationFrame(updateMotion);
-      if (focusMode) toast('Chế độ học tập', 'Nhạc đang phát trong giao diện học tập.', 'success');
+      if (focusMode && !focusToastId) {
+        toast('Chế độ học tập', 'Nhạc đang phát trong giao diện học tập.', 'success');
+      }
     });
     audio.addEventListener('pause', () => {
-      playBtn.querySelector('span:last-child').textContent = 'Phát';
-      playBtn.classList.add('pulse');
-      vinyl.classList.remove('playing');
-      wave.classList.add('paused');
-      waveState.textContent = 'Tạm dừng';
+      setAudioUiPlaying(false);
       stopMotion();
       visualizerRunning = false;
     });
 
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        if (!audio.paused) toast('Nhạc vẫn tiếp tục', 'Trình duyệt sẽ cố gắng giữ phát nhạc trong nền nếu hỗ trợ.', 'info');
-        if (focusMode) enableKeepAwake();
+      if (document.hidden && focusMode && !audio.paused && !hiddenNoticeShown) {
+        hiddenNoticeShown = true;
+        toast('Nhạc vẫn tiếp tục', 'Trình duyệt sẽ cố gắng giữ phát trong nền nếu hỗ trợ.', 'info');
       }
+      if (!document.hidden) hiddenNoticeShown = false;
     });
 
     window.addEventListener('pagehide', () => {
