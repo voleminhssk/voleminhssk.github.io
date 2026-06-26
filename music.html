@@ -56,6 +56,63 @@
       50% { transform: translateY(-22px) translateX(16px) scale(1.05); }
     }
 
+    setting-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:14px 16px;
+    margin-top:14px;
+    border-radius:18px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.08);
+}
+
+.switch{
+    position:relative;
+    display:inline-block;
+    width:58px;
+    height:32px;
+}
+
+.switch input{
+    opacity:0;
+    width:0;
+    height:0;
+}
+
+.slider{
+    position:absolute;
+    inset:0;
+    cursor:pointer;
+    background:#555;
+    border-radius:32px;
+    transition:.3s;
+}
+
+.slider::before{
+    content:"";
+    position:absolute;
+    width:24px;
+    height:24px;
+    left:4px;
+    top:4px;
+    background:#fff;
+    border-radius:50%;
+    transition:.3s;
+}
+
+.switch input:checked + .slider{
+    background:linear-gradient(135deg,#39d98a,#45a3ff);
+}
+
+.switch input:checked + .slider::before{
+    transform:translateX(26px);
+}
+
+.switch input:focus + .slider{
+    box-shadow:0 0 0 4px rgba(57,217,138,.25);
+}
+
     .app {
       position: relative;
       z-index: 1;
@@ -404,6 +461,10 @@
       </div>
 
       <div class="actions">
+        <label class="switch">
+    <input type="checkbox" id="studyMode">
+    <span class="slider"></span>
+</label>
         <button id="focusBtn" class="ghost"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4Zm0 2a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H7Z"/></svg></span><span>Chế độ tập trung học</span></button>
         <label class="file-label primary" for="fileInput"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3a1 1 0 0 1 1 1v6.59l1.3-1.3a1 1 0 1 1 1.4 1.42l-3.01 3a1 1 0 0 1-1.4 0l-3.01-3a1 1 0 1 1 1.4-1.42L11 10.59V4a1 1 0 0 1 1-1Zm-7 12a1 1 0 0 1 1 1v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2a1 1 0 1 1 2 0v2a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4v-2a1 1 0 0 1 1-1Z"/></svg></span><span>Tải nhạc tạm thời</span></label>
         <input id="fileInput" type="file" accept="audio/*" multiple />
@@ -419,6 +480,15 @@
           </div>
           <span class="badge" id="trackCount">0 bài nhạc</span>
         </div>
+
+        <div class="setting-item">
+    <span>Chế độ học tập</span>
+
+    <label class="switch">
+        <input type="checkbox" id="studyMode">
+        <span class="slider"></span>
+    </label>
+</div>
 
         <div class="now-playing">
           <div class="art" id="artBox"><div class="vinyl" id="vinyl"></div></div>
@@ -474,6 +544,7 @@
     const nextBtn = document.getElementById('nextBtn');
     const shuffleBtn = document.getElementById('shuffleBtn');
     const focusBtn = document.getElementById('focusBtn');
+    const studyMode = document.getElementById('studyMode');
     const fileInput = document.getElementById('fileInput');
     const clearBtn = document.getElementById('clearBtn');
     const demoBtn = document.getElementById('demoBtn');
@@ -673,24 +744,33 @@
         : 'Giao diện đã trở lại bình thường. Bạn có thể nghe và thao tác như trước.';
     }
 
-    function toggleFocusMode() {
-      focusMode = !focusMode;
-      app.classList.toggle('focus-mode', focusMode);
-      if (focusMode) {
+    function setFocusMode(enable) {
+    focusMode = enable;
+
+    app.classList.toggle('focus-mode', enable);
+
+    if (enable) {
         setBackground(2);
         showFocusUi(true);
         enableKeepAwake();
-        if (focusToastId) clearTimeout(focusToastId);
-        toast('Đã bật chế độ học tập', 'Giao diện yên tĩnh hơn, ít xao nhãng hơn.', 'success');
-      } else {
-        setBackground(currentBg);
+
+        toast(
+            'Đã bật chế độ học tập',
+            'Giao diện yên tĩnh hơn, ít xao nhãng hơn.',
+            'success'
+        );
+    } else {
+        setBackground(0);
         showFocusUi(false);
         disableKeepAwake();
-        if (focusToastId) clearTimeout(focusToastId);
-        toast('Đã tắt chế độ học tập', 'Giao diện đã trở về mặc định.', 'info');
-      }
-      focusToastId = setTimeout(() => { focusToastId = null; }, 3200);
+
+        toast(
+            'Đã tắt chế độ học tập',
+            'Đã trở về giao diện bình thường.',
+            'info'
+        );
     }
+}
 
     function normalizeTrack(item, index) {
       const url = item?.url || item?.src || item?.file;
@@ -807,7 +887,12 @@
       shuffleBtn.querySelector('span:last-child').textContent = shuffled ? 'Ngẫu nhiên: Bật' : 'Ngẫu nhiên';
       toast(shuffled ? 'Ngẫu nhiên đã bật' : 'Ngẫu nhiên đã tắt', shuffled ? 'Bài hát sẽ phát theo thứ tự ngẫu nhiên.' : 'Quay lại phát theo thứ tự.', 'info');
     });
-    focusBtn.addEventListener('click', toggleFocusMode);
+    focusBtn.addEventListener('click', () => {
+    setFocusMode(!focusMode);
+});
+    studyMode.addEventListener('change', () => {
+    setFocusMode(studyMode.checked);
+});
     fileInput.addEventListener('change', async (e) => {
       const files = Array.from(e.target.files || []);
       for (const file of files) await loadAudioFile(file);
