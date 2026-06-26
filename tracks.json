@@ -2,6 +2,16 @@
   {
     "name": "Yêu 3 Năm Dại 1 Giờ",
     "artist": "Chu Thuý Quỳnh",
-    "url": "remix1.mp3"
+    "url": "music/remix1.mp3"
+  },
+  {
+    "name": "Mùa Thu Và Lời Xin Lỗi",
+    "artist": "Thành Đạt",
+    "url": "music/remix2.mp3"
+  },
+  {
+    "name": "Địa Ngục Trần Gian",
+    "artist": "Phạm Kỳ",
+    "url": "music/remix3.mp3"
   }
 ]
