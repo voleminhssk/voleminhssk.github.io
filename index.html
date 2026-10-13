@@ -1,138 +1,85 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<title>BOT PHÂN TÍCH KHUNG GIỜ CHUẨN</title>
-
-<style>
-body {
-    background: #0f172a;
-    color: white;
-    font-family: Arial;
-    text-align: center;
-}
-
-.container {
-    margin-top: 40px;
-}
-
-input {
-    padding: 10px;
-    margin: 10px;
-    width: 220px;
-    background: #1e293b;
-    border: none;
-    color: white;
-}
-
-button {
-    padding: 12px 25px;
-    background: orange;
-    border: none;
-    cursor: pointer;
-}
-
-.day-box {
-    background: #1e293b;
-    margin: 15px auto;
-    padding: 15px;
-    width: 320px;
-    border-radius: 10px;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#10162f" />
+  <title>KTPL ExamLab — Ôn thi Kinh tế & Pháp luật</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="KTPL ExamLab trang chủ">
+      <span class="brand-mark">K<span>+</span></span>
+      <span><strong>ExamLab</strong><small>KINH TẾ & PHÁP LUẬT</small></span>
+    </a>
+    <div class="top-actions"><span class="live-dot"></span><span>Không gian ôn tập</span><button class="icon-btn" id="themeBtn" title="Đổi giao diện" aria-label="Đổi giao diện">◐</button></div>
+  </header>
 
-<div class="container">
-    <h1>🤖 BOT PHÂN TÍCH KHUNG GIỜ (PRO)</h1>
-
-    <input type="number" id="nap" placeholder="Tổng tiền nạp">
-    <input type="number" id="cuoc" placeholder="Tổng tiền cược">
-    <br>
-    <button onclick="analyze()">🚀 Phân tích</button>
-
-    <div id="result"></div>
-</div>
-
-<script>
-
-// 🔥 CORE: lấy TOP giờ (không bị trùng)
-function getBestHours(ratio, isWeekend) {
-    let hours = [];
-
-    for (let i = 0; i < 24; i++) {
-        let score = 0;
-
-        // 🧠 pattern hệ thống
-
-        // giờ đêm (xả)
-        if (i >= 1 && i <= 5) score += isWeekend ? 2 : 3;
-
-        // giờ chuyển
-        if ((i >= 9 && i <= 11) || (i >= 14 && i <= 16)) score += 2;
-
-        // giờ cao điểm (hút)
-        if (i >= 19 && i <= 23) score -= isWeekend ? 4 : 3;
-
-        // 🔥 ratio
-        if (ratio > 1.5) score += 2;
-        if (ratio > 2) score += 1;
-        if (ratio < 1) score -= 2;
-
-        // ✅ chống trùng (rất quan trọng)
-        score += i * 0.01;
-
-        hours.push({
-            hour: i + "h",
-            score: score
-        });
-    }
-
-    // 🔥 sort theo điểm
-    hours.sort((a,b)=>b.score-a.score);
-
-    return hours.slice(0,3); // TOP 3 giờ
-}
-
-// 🚀 MAIN
-function analyze() {
-    let nap = parseFloat(document.getElementById("nap").value);
-    let cuoc = parseFloat(document.getElementById("cuoc").value);
-
-    if (!nap || !cuoc) {
-        alert("Nhập đủ dữ liệu!");
-        return;
-    }
-
-    let ratio = cuoc / nap;
-
-    let days = [
-        "Thứ 2","Thứ 3","Thứ 4","Thứ 5",
-        "Thứ 6","Thứ 7","Chủ nhật"
-    ];
-
-    let html = "";
-
-    days.forEach((day, index) => {
-
-        let isWeekend = (index >= 4); // T6-CN
-
-        let bestHours = getBestHours(ratio, isWeekend);
-
-        html += `
-        <div class="day-box">
-            <h3>${day}</h3>
-            🔥 Giờ đẹp: ${bestHours.map(h => h.hour).join(" - ")} <br>
-            ⚡ Điểm: ${bestHours.map(h => h.score.toFixed(2)).join(" | ")}
+  <main class="container">
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-line"></span> LUYỆN THI THÔNG MINH</div>
+        <h1>Chinh phục <span>Kinh tế &<br class="desktop-break"/> Pháp luật.</span></h1>
+        <p>Luyện đề theo thời gian thực, nộp bài để chấm điểm và xem lại lời giải sau khi hoàn thành.</p>
+        <div class="hero-stats">
+          <div><strong>03</strong><span>Đề mẫu</span></div><i></i>
+          <div><strong>30</strong><span>Câu hỏi mẫu</span></div><i></i>
+          <div><strong>01</strong><span>Mục tiêu: tiến bộ</span></div>
         </div>
-        `;
-    });
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="orbit orbit-a"></div><div class="orbit orbit-b"></div>
+        <div class="glass-card"><div class="mini-label">YOUR NEXT LEVEL</div><div class="big-number">KT<span>PL</span></div><div class="mini-bars"><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></div><div class="glass-bottom"><span>LUYỆN TẬP</span><span class="tiny-pill">EXAM MODE</span></div></div>
+        <div class="floating-note note-top">✦ <span>Học chủ động</span></div><div class="floating-note note-bottom"><span class="checkmark">✓</span><span>Chấm điểm tự động</span></div>
+      </div>
+    </section>
 
-    document.getElementById("result").innerHTML = html;
-}
+    <section class="workspace" id="setupView">
+      <div class="section-heading"><div><div class="eyebrow">BẮT ĐẦU TẠI ĐÂY</div><h2>Chọn bài thi của bạn</h2></div><span class="subtle">Đáp án được ẩn trong lúc làm bài</span></div>
+      <div class="setup-grid">
+        <div class="exam-list">
+          <button class="exam-card selected" data-exam="0"><span class="exam-icon purple">01</span><span class="exam-info"><strong>Đề luyện tập số 01</strong><small>Kiến thức nền tảng · 10 câu</small><span class="tag">CƠ BẢN – VẬN DỤNG</span></span><span class="radio-indicator"></span></button>
+          <button class="exam-card" data-exam="1"><span class="exam-icon blue">02</span><span class="exam-info"><strong>Đề luyện tập số 02</strong><small>Tình huống thực tiễn · 10 câu</small><span class="tag">VẬN DỤNG</span></span><span class="radio-indicator"></span></button>
+          <button class="exam-card" data-exam="2"><span class="exam-icon orange">03</span><span class="exam-info"><strong>Đề luyện tập số 03</strong><small>Tổng hợp kiến thức · 10 câu</small><span class="tag">TỔNG HỢP</span></span><span class="radio-indicator"></span></button>
+        </div>
+        <aside class="config-card">
+          <div class="config-title"><span class="settings-icon">☷</span><div><strong>Cài đặt bài thi</strong><small>Tùy chỉnh lượt luyện tập</small></div></div>
+          <label for="durationSelect">Thời gian làm bài</label>
+          <div class="select-wrap"><select id="durationSelect"><option value="15">15 phút</option><option value="20" selected>20 phút</option><option value="30">30 phút</option><option value="45">45 phút</option></select><span>⌄</span></div>
+          <div class="rules"><div><span>✓</span> Không hiển thị đáp án trước</div><div><span>✓</span> Có thể đánh dấu câu cần xem lại</div><div><span>✓</span> Chấm điểm sau khi nộp bài</div></div>
+          <button class="primary-btn" id="startBtn">Bắt đầu làm bài <span>→</span></button>
+          <p class="disclaimer">Đề mẫu dùng để luyện tập, không phải đề thi chính thức.</p>
+        </aside>
+      </div>
+    </section>
 
-</script>
+    <section class="test-view hidden" id="testView">
+      <div class="test-top"><button class="back-btn" id="quitBtn">← Thoát bài thi</button><div class="test-name"><span class="status-dot"></span><span id="currentExamTitle">Đề luyện tập số 01</span></div><div class="timer" id="timer">20:00</div></div>
+      <div class="progress-wrap"><div class="progress-meta"><span id="progressText">Đã trả lời 0/10 câu</span><span id="progressPercent">0%</span></div><div class="progress-track"><div id="progressBar"></div></div></div>
+      <div class="test-layout">
+        <div class="question-panel">
+          <div class="question-meta"><span id="questionNumber">CÂU 01 / 10</span><button id="flagBtn" class="flag-btn">⚑ Đánh dấu xem lại</button></div>
+          <h2 id="questionText"></h2><div class="question-hint">Chọn một phương án phù hợp nhất.</div>
+          <div id="optionsList" class="options-list"></div>
+          <div class="question-nav"><button class="secondary-btn" id="prevBtn">← Câu trước</button><span id="pageCount">01 / 10</span><button class="primary-btn next-btn" id="nextBtn">Câu tiếp theo <span>→</span></button></div>
+        </div>
+        <aside class="question-sidebar"><div class="sidebar-heading"><strong>Bảng câu hỏi</strong><span id="answeredCount">0/10</span></div><p>Chọn số câu để di chuyển nhanh.</p><div class="question-grid" id="questionGrid"></div><div class="legend"><span><i class="legend-current"></i>Đang xem</span><span><i class="legend-done"></i>Đã chọn</span><span><i class="legend-flag"></i>Đánh dấu</span></div><div class="submit-card"><strong>Sẵn sàng nộp bài?</strong><p>Kiểm tra các câu còn bỏ trống trước khi nộp.</p><button class="submit-btn" id="submitBtn">Nộp bài thi <span>↗</span></button></div></aside>
+      </div>
+    </section>
 
+    <section class="result-view hidden" id="resultView">
+      <div class="result-banner"><div class="result-symbol">✓</div><div><div class="eyebrow">HOÀN THÀNH BÀI THI</div><h2 id="resultTitle">Bạn đã hoàn thành bài thi!</h2><p id="resultSubtitle">Kết quả của bạn đã được tổng hợp.</p></div></div>
+      <div class="result-stats"><div class="score-card"><span>ĐIỂM SỐ</span><strong id="scoreValue">0.0<small>/10</small></strong><div class="score-track"><div id="scoreBar"></div></div></div><div class="stat-card"><span>TRẢ LỜI ĐÚNG</span><strong id="correctValue">0/10</strong><small>Câu trả lời chính xác</small></div><div class="stat-card"><span>CHƯA TRẢ LỜI</span><strong id="blankValue">0</strong><small>Câu bỏ trống</small></div><div class="stat-card"><span>THỜI GIAN</span><strong id="elapsedValue">00:00</strong><small>Thời gian đã dùng</small></div></div>
+      <div class="review-header"><div><div class="eyebrow">PHÂN TÍCH KẾT QUẢ</div><h2>Xem lại từng câu</h2><p>Đáp án và giải thích chỉ xuất hiện sau khi nộp bài.</p></div><button class="secondary-btn" id="retryBtn">↻ Làm lại đề này</button></div>
+      <div id="reviewList" class="review-list"></div><button class="primary-btn back-home-btn" id="homeBtn">Về trang chọn đề <span>→</span></button>
+    </section>
+
+    <footer><span>© 2026 ExamLab KTPL</span><span>Học chắc kiến thức · Tự tin làm bài</span></footer>
+  </main>
+  <div class="modal-backdrop hidden" id="confirmModal"><div class="confirm-modal"><div class="modal-symbol">?</div><h3>Nộp bài thi ngay?</h3><p id="confirmText">Bạn vẫn còn câu chưa trả lời. Bạn có chắc muốn nộp bài?</p><div class="modal-actions"><button class="secondary-btn" id="cancelSubmit">Tiếp tục làm</button><button class="primary-btn" id="confirmSubmit">Nộp bài</button></div></div></div>
+  <div class="toast" id="toast"></div>
+  <script src="script.js"></script>
 </body>
 </html>
